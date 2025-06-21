@@ -6,4 +6,5 @@ plugins {
     alias(libs.plugins.hilt) apply false
     id("com.google.devtools.ksp") version "2.0.21-1.0.27" apply false
     id("io.gitlab.arturbosch.detekt") version "1.23.6" apply false
+    id("org.jetbrains.dokka") version libs.versions.dokka.get() apply false
 }

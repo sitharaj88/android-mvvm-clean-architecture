@@ -8,6 +8,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("io.gitlab.arturbosch.detekt")
     jacoco
+    id("org.jetbrains.dokka")
 }
 
 android {
@@ -202,54 +203,3 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         include("*.exec")
     })
 }
-
-
-//tasks.register<JacocoReport>("jacocoTestReport") {
-//    dependsOn("testDebugUnitTest")
-//    group = "Reporting"
-//    description = "Generate Jacoco coverage reports after running tests."
-//    reports {
-//        xml.required.set(true)
-//        html.required.set(true)
-//    }
-//    val fileFilter = listOf(
-//        "**/R.class",
-//        "**/R$*.class",
-//        "**/BuildConfig.*",
-//        "**/Manifest*.*",
-//        "**/*Test*.*",
-//        "android/**/*.*",
-//        "**/Hilt_*.class",
-//        "**/dagger/hilt/**",
-//        "**/hilt_aggregated_deps/**",
-//        "**/di/**",
-//        "**/Dagger*Component.class",
-//        "**/*_Factory.class",
-//        "**/*_Impl.class",
-//        "**/databinding/**",
-//        "**/views/databinding/**",
-//        "**/BR.*",
-//        "**/BuildConfig.*",
-//        "**/Manifest*.*",
-//        "**/*_MembersInjector.class",
-//        "**/AutoValue_*.class",
-//        "**/*_HiltModules.*",
-//        "**/*_HiltComponents.*"
-//    )
-//    val kotlinDebugTree = fileTree("$buildDir/tmp/kotlin-classes/debug") {
-//        exclude(fileFilter)
-//    }
-//    val javaDebugTree = fileTree("$buildDir/intermediates/javac/debug/classes") {
-//        exclude(fileFilter)
-//    }
-//    val mainJavaSrc = "src/main/java"
-//    val mainKotlinSrc = "src/main/kotlin"
-//    classDirectories.setFrom(files(kotlinDebugTree, javaDebugTree))
-//    sourceDirectories.setFrom(files(mainJavaSrc, mainKotlinSrc))
-//    executionData.setFrom(files("$buildDir/jacoco/testDebugUnitTest.exec").filter { it.exists() })
-//    doFirst {
-//        println("Jacoco classDirs: " + classDirectories.files)
-//        println("Jacoco sourceDirs: " + sourceDirectories.files)
-//        println("Jacoco execData: " + executionData.files)
-//    }
-//}
