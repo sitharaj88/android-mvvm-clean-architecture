@@ -1,3 +1,5 @@
+import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,6 +7,7 @@ plugins {
     alias(libs.plugins.hilt)
     id("com.google.devtools.ksp")
     id("io.gitlab.arturbosch.detekt")
+    jacoco
 }
 
 android {
@@ -40,8 +43,27 @@ android {
     buildFeatures {
         compose = true
     }
+
     testOptions {
-        unitTests.isIncludeAndroidResources = true
+        unitTests {
+            // let Robolectric see Android resources
+            isIncludeAndroidResources = true
+
+            // configure every unit‐test task (test, testDebugUnitTest, etc.)
+            all {
+                // 'it' is the Test task here
+                it.extensions.configure<JacocoTaskExtension> {
+                    isIncludeNoLocationClasses = true
+                    // write the exec file under build/jacoco/<taskName>.exec
+                    setDestinationFile(layout.buildDirectory
+                        .file("jacoco/${it.name}.exec")
+                        .get()
+                        .asFile)
+                }
+
+
+            }
+        }
     }
 }
 
@@ -124,8 +146,9 @@ plugins.withId("jacoco") {
 tasks.withType<Test>().configureEach {
     useJUnit()
     finalizedBy("jacocoTestReport")
-    (this as org.gradle.api.tasks.testing.Test).extensions.findByType(org.gradle.testing.jacoco.plugins.JacocoTaskExtension::class.java)?.apply {
-        setIncludeNoLocationClasses(true)
+    this.extensions.findByType(org.gradle.testing.jacoco.plugins.JacocoTaskExtension::class.java)?.apply {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
     }
 }
 
@@ -133,13 +156,15 @@ tasks.withType<Test>().configureEach {
 apply(plugin = "jacoco")
 
 tasks.register<JacocoReport>("jacocoTestReport") {
-    dependsOn("testDebugUnitTest")
-    group = "Reporting"
-    description = "Generate Jacoco coverage reports after running tests."
+    // make sure we run both plain and variant tests
+    dependsOn("testDebugUnitTest", "test")
+
     reports {
         xml.required.set(true)
         html.required.set(true)
     }
+
+    // exclude what you don’t want
     val fileFilter = listOf(
         "**/R.class",
         "**/R$*.class",
@@ -164,20 +189,67 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         "**/*_HiltModules.*",
         "**/*_HiltComponents.*"
     )
-    val kotlinDebugTree = fileTree("$buildDir/tmp/kotlin-classes/debug") {
-        exclude(fileFilter)
-    }
-    val javaDebugTree = fileTree("$buildDir/intermediates/javac/debug/classes") {
-        exclude(fileFilter)
-    }
-    val mainJavaSrc = "src/main/java"
-    val mainKotlinSrc = "src/main/kotlin"
+    // your class directories stay the same
+    val kotlinDebugTree = fileTree("$buildDir/tmp/kotlin-classes/debug") { exclude(fileFilter) }
+    val javaDebugTree   = fileTree("$buildDir/intermediates/javac/debug/classes") { exclude(fileFilter) }
     classDirectories.setFrom(files(kotlinDebugTree, javaDebugTree))
-    sourceDirectories.setFrom(files(mainJavaSrc, mainKotlinSrc))
-    executionData.setFrom(files("$buildDir/jacoco/testDebugUnitTest.exec").filter { it.exists() })
-    doFirst {
-        println("Jacoco classDirs: " + classDirectories.files)
-        println("Jacoco sourceDirs: " + sourceDirectories.files)
-        println("Jacoco execData: " + executionData.files)
-    }
+
+    // point source roots
+    sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
+
+    // **grab every exec** under build/jacoco
+    executionData.setFrom(fileTree("$buildDir/jacoco") {
+        include("*.exec")
+    })
 }
+
+
+//tasks.register<JacocoReport>("jacocoTestReport") {
+//    dependsOn("testDebugUnitTest")
+//    group = "Reporting"
+//    description = "Generate Jacoco coverage reports after running tests."
+//    reports {
+//        xml.required.set(true)
+//        html.required.set(true)
+//    }
+//    val fileFilter = listOf(
+//        "**/R.class",
+//        "**/R$*.class",
+//        "**/BuildConfig.*",
+//        "**/Manifest*.*",
+//        "**/*Test*.*",
+//        "android/**/*.*",
+//        "**/Hilt_*.class",
+//        "**/dagger/hilt/**",
+//        "**/hilt_aggregated_deps/**",
+//        "**/di/**",
+//        "**/Dagger*Component.class",
+//        "**/*_Factory.class",
+//        "**/*_Impl.class",
+//        "**/databinding/**",
+//        "**/views/databinding/**",
+//        "**/BR.*",
+//        "**/BuildConfig.*",
+//        "**/Manifest*.*",
+//        "**/*_MembersInjector.class",
+//        "**/AutoValue_*.class",
+//        "**/*_HiltModules.*",
+//        "**/*_HiltComponents.*"
+//    )
+//    val kotlinDebugTree = fileTree("$buildDir/tmp/kotlin-classes/debug") {
+//        exclude(fileFilter)
+//    }
+//    val javaDebugTree = fileTree("$buildDir/intermediates/javac/debug/classes") {
+//        exclude(fileFilter)
+//    }
+//    val mainJavaSrc = "src/main/java"
+//    val mainKotlinSrc = "src/main/kotlin"
+//    classDirectories.setFrom(files(kotlinDebugTree, javaDebugTree))
+//    sourceDirectories.setFrom(files(mainJavaSrc, mainKotlinSrc))
+//    executionData.setFrom(files("$buildDir/jacoco/testDebugUnitTest.exec").filter { it.exists() })
+//    doFirst {
+//        println("Jacoco classDirs: " + classDirectories.files)
+//        println("Jacoco sourceDirs: " + sourceDirectories.files)
+//        println("Jacoco execData: " + executionData.files)
+//    }
+//}
