@@ -40,6 +40,9 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -69,6 +72,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit.coroutine.adapter)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -94,9 +98,86 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.hilt.navigation.compose)
+
+    // Testing
+    testImplementation(libs.robolectric)
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    testImplementation(libs.androidx.core.testing)
+
 }
 
 detekt {
     config = files("$rootDir/detekt.yml")
     buildUponDefaultConfig = true
+}
+
+// JaCoCo configuration
+plugins.withId("jacoco") {
+    extensions.configure<JacocoPluginExtension> {
+        toolVersion = "0.8.11"
+    }
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnit()
+    finalizedBy("jacocoTestReport")
+    (this as org.gradle.api.tasks.testing.Test).extensions.findByType(org.gradle.testing.jacoco.plugins.JacocoTaskExtension::class.java)?.apply {
+        setIncludeNoLocationClasses(true)
+    }
+}
+
+// JaCoCo configuration for Android
+apply(plugin = "jacoco")
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+    group = "Reporting"
+    description = "Generate Jacoco coverage reports after running tests."
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+    val fileFilter = listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*",
+        "**/Hilt_*.class",
+        "**/dagger/hilt/**",
+        "**/hilt_aggregated_deps/**",
+        "**/di/**",
+        "**/Dagger*Component.class",
+        "**/*_Factory.class",
+        "**/*_Impl.class",
+        "**/databinding/**",
+        "**/views/databinding/**",
+        "**/BR.*",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*_MembersInjector.class",
+        "**/AutoValue_*.class",
+        "**/*_HiltModules.*",
+        "**/*_HiltComponents.*"
+    )
+    val kotlinDebugTree = fileTree("$buildDir/tmp/kotlin-classes/debug") {
+        exclude(fileFilter)
+    }
+    val javaDebugTree = fileTree("$buildDir/intermediates/javac/debug/classes") {
+        exclude(fileFilter)
+    }
+    val mainJavaSrc = "src/main/java"
+    val mainKotlinSrc = "src/main/kotlin"
+    classDirectories.setFrom(files(kotlinDebugTree, javaDebugTree))
+    sourceDirectories.setFrom(files(mainJavaSrc, mainKotlinSrc))
+    executionData.setFrom(files("$buildDir/jacoco/testDebugUnitTest.exec").filter { it.exists() })
+    doFirst {
+        println("Jacoco classDirs: " + classDirectories.files)
+        println("Jacoco sourceDirs: " + sourceDirectories.files)
+        println("Jacoco execData: " + executionData.files)
+    }
 }
