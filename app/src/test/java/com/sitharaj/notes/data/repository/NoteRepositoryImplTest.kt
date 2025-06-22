@@ -12,12 +12,16 @@ import com.sitharaj.notes.data.local.entity.NoteEntity
 import com.sitharaj.notes.data.local.entity.SyncState
 import com.sitharaj.notes.data.remote.NoteRemoteDataSource
 import com.sitharaj.notes.domain.model.Note
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import org.junit.*
-import org.junit.Assert.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.*
+import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 

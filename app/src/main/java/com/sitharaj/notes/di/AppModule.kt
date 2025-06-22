@@ -10,7 +10,13 @@ import com.sitharaj.notes.data.local.NoteLocalDataSource
 import com.sitharaj.notes.data.remote.NoteRemoteDataSource
 import com.sitharaj.notes.data.repository.NoteRepositoryImpl
 import com.sitharaj.notes.domain.repository.NoteRepository
-import com.sitharaj.notes.domain.usecase.*
+import com.sitharaj.notes.domain.usecase.AddNoteUseCase
+import com.sitharaj.notes.domain.usecase.DeleteNoteUseCase
+import com.sitharaj.notes.domain.usecase.GetNoteByIdUseCase
+import com.sitharaj.notes.domain.usecase.GetNotesUseCase
+import com.sitharaj.notes.domain.usecase.NoteUseCases
+import com.sitharaj.notes.domain.usecase.SyncNotesUseCase
+import com.sitharaj.notes.domain.usecase.UpdateNoteUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

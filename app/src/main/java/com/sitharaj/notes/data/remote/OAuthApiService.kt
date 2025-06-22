@@ -16,6 +16,7 @@ data class OAuthTokenResponse(
 )
 
 interface OAuthApiService {
+    @Suppress("LongParameterList")
     @FormUrlEncoded
     @POST("/oauth/token")
     suspend fun getToken(
@@ -27,4 +28,3 @@ interface OAuthApiService {
         @Field("refresh_token") refreshToken: String? = null
     ): OAuthTokenResponse
 }
-

@@ -132,12 +132,14 @@ dependencies {
 
     testImplementation(libs.androidx.core.testing)
 
+    detektPlugins(libs.detekt.compose.rules)
 }
 
 detekt {
-    config = files("$rootDir/detekt.yml")
     buildUponDefaultConfig = true
+    config.setFrom("$rootDir/detekt.yml")
 }
+
 
 // JaCoCo configuration
 plugins.withId("jacoco") {

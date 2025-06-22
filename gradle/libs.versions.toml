@@ -15,7 +15,7 @@ activityCompose = "1.10.1"
 composeBom = "2025.06.01"
 lifecycleViewmodelKtx = "2.9.1"
 lifecycleLivedataKtx = "2.9.1"
-mockitoCore = "5.4.0"
+mockitoCore = "5.7.0"
 mockitoKotlin = "5.2.1"
 mockk = "1.13.10"
 navigationCompose = "2.9.0"
@@ -30,7 +30,7 @@ hiltAndroidCompiler = "2.51"
 ksp = "2.0.21-1.0.27"
 kotlinxCoroutinesAndroid = "1.8.1"
 kotlinxCoroutinesCore = "1.8.1"
-serialization = "1.6.3"
+serialization = "1.7.3"
 retrofitKotlinSerialization = "0.8.0"
 workRuntimeKtx = "2.10.2"
 workHilt = "1.2.0"
@@ -81,6 +81,7 @@ androidx-navigation-compose-jvmstubs = { group = "androidx.navigation", name = "
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 dokka-gradle-plugin = { group = "org.jetbrains.dokka", name = "dokka-gradle-plugin", version.ref = "dokka" }
+detekt-compose-rules = { module = "ru.kode:detekt-rules-compose", version = "1.4.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -11,6 +11,7 @@ import com.sitharaj.notes.domain.repository.NoteRepository
 import com.sitharaj.notes.data.local.entity.SyncState
 import com.sitharaj.notes.data.mapper.toDto
 import com.sitharaj.notes.data.local.entity.NoteEntity
+import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,8 +55,14 @@ class NoteRepositoryImpl(
             }
             mergeRemoteNotes()
             _syncState.value = SyncState.SYNCED
-        } catch (e: Exception) {
-            logger.e("NoteRepositoryImpl", "Global sync error", e)
+        } catch (e: IOException) {
+            logger.e("NoteRepositoryImpl", "Global sync IO error", e)
+            _syncState.value = SyncState.FAILED
+        } catch (e: IllegalArgumentException) {
+            logger.e("NoteRepositoryImpl", "Global sync illegal argument error", e)
+            _syncState.value = SyncState.FAILED
+        } catch (e: NullPointerException) {
+            logger.e("NoteRepositoryImpl", "Global sync null pointer error", e)
             _syncState.value = SyncState.FAILED
         }
     }
@@ -67,8 +74,14 @@ class NoteRepositoryImpl(
                 SyncState.DELETED -> deleteRemoteEntity(entity)
                 else -> {}
             }
-        } catch (e: Exception) {
-            logger.e("NoteRepositoryImpl", "Sync error for note ${entity.id}", e)
+        } catch (e: IOException) {
+            logger.e("NoteRepositoryImpl", "Sync IO error for note ${entity.id}", e)
+            local.noteDao.updateSyncState(entity.id, SyncState.FAILED)
+        } catch (e: IllegalArgumentException) {
+            logger.e("NoteRepositoryImpl", "Sync illegal argument for note ${entity.id}", e)
+            local.noteDao.updateSyncState(entity.id, SyncState.FAILED)
+        } catch (e: NullPointerException) {
+            logger.e("NoteRepositoryImpl", "Sync null pointer for note ${entity.id}", e)
             local.noteDao.updateSyncState(entity.id, SyncState.FAILED)
         }
     }
@@ -86,8 +99,14 @@ class NoteRepositoryImpl(
                 local.noteDao.updateSyncState(entity.id, SyncState.SYNCED)
                 local.updateNote(entity.copy(lastSynced = now, syncState = SyncState.SYNCED))
             }
-        } catch (e: Exception) {
-            logger.e("NoteRepositoryImpl", "Failed to sync pending note ${entity.id}", e)
+        } catch (e: IOException) {
+            logger.e("NoteRepositoryImpl", "Failed to sync pending note (IO) ${entity.id}", e)
+            local.noteDao.updateSyncState(entity.id, SyncState.FAILED)
+        } catch (e: IllegalArgumentException) {
+            logger.e("NoteRepositoryImpl", "Failed to sync pending note (illegal argument) ${entity.id}", e)
+            local.noteDao.updateSyncState(entity.id, SyncState.FAILED)
+        } catch (e: NullPointerException) {
+            logger.e("NoteRepositoryImpl", "Failed to sync pending note (null pointer) ${entity.id}", e)
             local.noteDao.updateSyncState(entity.id, SyncState.FAILED)
         }
     }
@@ -96,8 +115,14 @@ class NoteRepositoryImpl(
         try {
             remote.deleteNote(entity.id)
             local.noteDao.deleteNote(entity)
-        } catch (e: Exception) {
-            logger.e("NoteRepositoryImpl", "Failed to delete note ${entity.id}", e)
+        } catch (e: IOException) {
+            logger.e("NoteRepositoryImpl", "Failed to delete note (IO) ${entity.id}", e)
+            local.noteDao.updateSyncState(entity.id, SyncState.FAILED)
+        } catch (e: IllegalArgumentException) {
+            logger.e("NoteRepositoryImpl", "Failed to delete note (illegal argument) ${entity.id}", e)
+            local.noteDao.updateSyncState(entity.id, SyncState.FAILED)
+        } catch (e: NullPointerException) {
+            logger.e("NoteRepositoryImpl", "Failed to delete note (null pointer) ${entity.id}", e)
             local.noteDao.updateSyncState(entity.id, SyncState.FAILED)
         }
     }

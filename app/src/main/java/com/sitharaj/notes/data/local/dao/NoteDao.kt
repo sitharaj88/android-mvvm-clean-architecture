@@ -1,6 +1,11 @@
 package com.sitharaj.notes.data.local.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import com.sitharaj.notes.data.local.entity.NoteEntity
 import com.sitharaj.notes.data.local.entity.SyncState
 import kotlinx.coroutines.flow.Flow
