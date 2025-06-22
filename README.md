@@ -129,7 +129,7 @@ This project uses several tools to ensure code quality and maintainability:
 ---
 
 ## License
-This project is licensed under the Apache 2.0 License.
+This project is licensed under the [Apache 2.0 License](LICENSE).
 
 ---
 
