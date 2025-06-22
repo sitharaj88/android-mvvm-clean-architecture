@@ -128,6 +128,12 @@ This project uses several tools to ensure code quality and maintainability:
 
 ---
 
+## Offline-First Approach
+- The Notes App is designed with an **offline-first** mindset. All notes are stored locally using Room database, ensuring your data is always available—even without an internet connection.
+- When online, the app can be extended to sync with cloud services, but your core experience and data remain robust and accessible offline.
+
+---
+
 ## License
 This project is licensed under the [Apache 2.0 License](LICENSE).
 
