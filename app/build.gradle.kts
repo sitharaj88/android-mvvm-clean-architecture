@@ -208,3 +208,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         include("*.exec")
     })
 }
+
+tasks.dokkaHtml.configure {
+    moduleName.set("Notes App")
+}

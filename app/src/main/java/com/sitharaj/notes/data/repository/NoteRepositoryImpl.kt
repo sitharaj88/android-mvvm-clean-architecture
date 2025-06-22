@@ -1,3 +1,21 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Sitharaj Seenivasan
+ * @date 22 Jun 2025
+ * @version 1.0.0
+ */
+
 package com.sitharaj.notes.data.repository
 
 import com.sitharaj.notes.common.AndroidLogger
@@ -17,35 +35,80 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
+/**
+ * Implementation of [NoteRepository] that manages note data from local and remote sources.
+ *
+ * This repository handles synchronization between the local database and the remote server,
+ * including conflict resolution and sync state management.
+ *
+ * @property local The local data source for notes.
+ * @property remote The remote data source for notes.
+ * @property logger Logger for error and debug messages.
+ *
+ * @author Sitharaj Seenivasan
+ * @date 22 Jun 2025
+ * @version 1.0.0
+ */
 class NoteRepositoryImpl(
     private val local: NoteLocalDataSource,
     private val remote: NoteRemoteDataSource,
     private val logger: Logger = AndroidLogger()
 ) : NoteRepository {
     private val _syncState = MutableStateFlow<SyncState>(SyncState.SYNCED)
+    /**
+     * The current synchronization state as a [StateFlow].
+     */
     val syncState: StateFlow<SyncState> get() = _syncState
 
+    /**
+     * Returns a [Flow] of all notes, excluding those marked as deleted.
+     */
     override fun getNotes(): Flow<List<Note>> =
         local.getNotes().map { list ->
             list.filter { it.syncState != SyncState.DELETED }
                 .map { it.toDomain() }
         }
 
+    /**
+     * Returns a note by its id, or null if not found.
+     *
+     * @param id The id of the note to retrieve.
+     * @return The [Note] with the given id, or null if not found.
+     */
     override suspend fun getNoteById(id: Int): Note? =
         local.getNoteById(id)?.toDomain()
 
+    /**
+     * Adds a new note to the local database and marks it as pending sync.
+     *
+     * @param note The [Note] to add.
+     */
     override suspend fun addNote(note: Note) {
         local.insertNote(note.toEntity(syncState = SyncState.PENDING))
     }
 
+    /**
+     * Updates an existing note in the local database and marks it as pending sync.
+     *
+     * @param note The [Note] to update.
+     */
     override suspend fun updateNote(note: Note) {
         local.updateNote(note.toEntity(syncState = SyncState.PENDING))
     }
 
+    /**
+     * Marks a note as deleted in the local database.
+     *
+     * @param note The [Note] to delete.
+     */
     override suspend fun deleteNote(note: Note) {
         local.updateNote(note.toEntity(syncState = SyncState.DELETED))
     }
 
+    /**
+     * Synchronizes notes between the local database and the remote server.
+     * Handles pending, deleted, and failed sync states.
+     */
     override suspend fun syncNotes() {
         try {
             _syncState.value = SyncState.PENDING
@@ -67,6 +130,11 @@ class NoteRepositoryImpl(
         }
     }
 
+    /**
+     * Synchronizes a single note entity based on its sync state.
+     *
+     * @param entity The [NoteEntity] to sync.
+     */
     private suspend fun syncEntity(entity: NoteEntity) {
         try {
             when (entity.syncState) {
@@ -86,6 +154,11 @@ class NoteRepositoryImpl(
         }
     }
 
+    /**
+     * Synchronizes a pending note entity with the remote server.
+     *
+     * @param entity The [NoteEntity] to sync.
+     */
     private suspend fun syncPendingEntity(entity: NoteEntity) {
         val now = System.currentTimeMillis()
         val dto = entity.toDto().copy(lastModified = now)
@@ -111,6 +184,11 @@ class NoteRepositoryImpl(
         }
     }
 
+    /**
+     * Deletes a note entity from the remote server and local database.
+     *
+     * @param entity The [NoteEntity] to delete.
+     */
     private suspend fun deleteRemoteEntity(entity: NoteEntity) {
         try {
             remote.deleteNote(entity.id)
@@ -127,6 +205,9 @@ class NoteRepositoryImpl(
         }
     }
 
+    /**
+     * Merges notes from the remote server into the local database, resolving conflicts by last modified time.
+     */
     private suspend fun mergeRemoteNotes() {
         val remoteNotes = remote.getNotes()
         val remoteEntities = remoteNotes.map { it.toEntity(SyncState.SYNCED) }

@@ -1,3 +1,21 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Sitharaj Seenivasan
+ * @date 22 Jun 2025
+ * @version 1.0.0
+ */
+
 package com.sitharaj.notes.presentation.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +57,20 @@ import androidx.navigation.NavHostController
 import com.sitharaj.notes.domain.model.Note
 import com.sitharaj.notes.presentation.viewmodel.NotesViewModel
 
+/**
+ * Composable screen for adding or editing a note in the Notes application.
+ *
+ * This screen provides a UI for creating a new note or editing an existing one, including
+ * title and content fields, save and delete actions, and a confirmation dialog for deletion.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param noteId The id of the note to edit, or null/0 for a new note.
+ * @param viewModel The [NotesViewModel] providing note data and actions (default: Hilt-injected).
+ *
+ * @author Sitharaj Seenivasan
+ * @date 22 Jun 2025
+ * @version 1.0.0
+ */
 @Suppress("FunctionNaming", "LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

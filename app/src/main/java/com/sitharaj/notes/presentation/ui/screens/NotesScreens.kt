@@ -1,3 +1,32 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Sitharaj Seenivasan
+ * @date 22 Jun 2025
+ * @version 1.0.0
+ */
+
+/**
+ * Main composable and UI components for the Notes application.
+ *
+ * This file contains the main navigation host, notes list screen, note card, and sync status bar
+ * for the Notes app, using Jetpack Compose.
+ *
+ * @author Sitharaj Seenivasan
+ * @date 22 Jun 2025
+ * @version 1.0.0
+ */
+
 package com.sitharaj.notes.presentation.ui.screens
 
 import androidx.compose.foundation.clickable
@@ -44,6 +73,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 
+/**
+ * Root composable for the Notes application, setting up navigation and the main screens.
+ *
+ * @param innerPadding The padding to apply around the navigation host.
+ */
 @Composable
 @Suppress("FunctionNaming")
 fun NotesApp(innerPadding: PaddingValues = PaddingValues()) {
@@ -63,6 +97,12 @@ fun NotesApp(innerPadding: PaddingValues = PaddingValues()) {
     }
 }
 
+/**
+ * Composable screen displaying the list of notes.
+ *
+ * @param navController The navigation controller for navigating to other screens.
+ * @param viewModel The [NotesViewModel] providing note data and actions (default: Hilt-injected).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Suppress("FunctionNaming")
@@ -108,6 +148,12 @@ fun NotesListScreen(navController: NavHostController, viewModel: NotesViewModel 
     }
 }
 
+/**
+ * Composable for displaying a single note card in the notes list.
+ *
+ * @param note The [Note] to display.
+ * @param onClick Callback when the card is clicked.
+ */
 @Composable
 @Suppress("FunctionNaming")
 fun NoteCard(note: Note, onClick: () -> Unit) {
@@ -141,6 +187,11 @@ fun NoteCard(note: Note, onClick: () -> Unit) {
     }
 }
 
+/**
+ * Composable for displaying the sync status bar at the bottom of the screen.
+ *
+ * @param syncState The current [SyncState] to display.
+ */
 @Composable
 @Suppress("FunctionNaming")
 fun SyncStatusBar(syncState: SyncState) {
