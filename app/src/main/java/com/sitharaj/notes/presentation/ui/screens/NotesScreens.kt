@@ -1,4 +1,4 @@
-package com.sitharaj.notes.presentation
+package com.sitharaj.notes.presentation.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,6 +22,8 @@ import com.sitharaj.notes.domain.model.Note
 import com.sitharaj.notes.data.local.entity.SyncState
 import com.sitharaj.notes.presentation.viewmodel.NotesViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
 
 @Composable
 fun NotesApp(innerPadding: PaddingValues = PaddingValues()) {
@@ -88,7 +90,9 @@ fun NoteCard(note: Note, onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(note.content, maxLines = 2, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Last edited: " + note.lastModified.let { java.text.SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(java.util.Date(it)) }, style = MaterialTheme.typography.labelSmall)
+            Text("Last edited: " + note.lastModified.let { SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(
+                Date(it)
+            ) }, style = MaterialTheme.typography.labelSmall)
         }
     }
 }

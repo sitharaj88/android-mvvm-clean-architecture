@@ -1,4 +1,4 @@
-package com.sitharaj.notes.presentation
+package com.sitharaj.notes.presentation.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.sitharaj.notes.domain.model.Note
 import com.sitharaj.notes.presentation.viewmodel.NotesViewModel
@@ -20,7 +21,7 @@ import com.sitharaj.notes.presentation.viewmodel.NotesViewModel
 fun NoteEditScreen(
     navController: NavHostController,
     noteId: Int?,
-    viewModel: NotesViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    viewModel: NotesViewModel = hiltViewModel()
 ) {
     val notes by viewModel.notes.collectAsState()
     val note = remember(notes, noteId) { notes.find { it.id == noteId } ?: Note(title = "", content = "") }

@@ -127,6 +127,8 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockito.kotlin)
 
     testImplementation(libs.androidx.core.testing)
 
@@ -188,7 +190,8 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         "**/*_MembersInjector.class",
         "**/AutoValue_*.class",
         "**/*_HiltModules.*",
-        "**/*_HiltComponents.*"
+        "**/*_HiltComponents.*",
+        "**/presentation/ui/**"
     )
     // your class directories stay the same
     val kotlinDebugTree = fileTree("$buildDir/tmp/kotlin-classes/debug") { exclude(fileFilter) }
