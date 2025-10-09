@@ -27,7 +27,7 @@
  * @version 1.0.0
  */
 
-package com.sitharaj.notes.ui.theme
+package com.sitharaj.notes.design
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

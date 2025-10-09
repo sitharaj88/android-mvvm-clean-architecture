@@ -23,8 +23,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.sitharaj.notes.presentation.ui.screens.NotesApp
-import com.sitharaj.notes.ui.theme.NotesTheme
+import com.sitharaj.notes.design.NotesTheme
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.compose.material3.Scaffold
 
 /**
  * The main entry point for the Notes application.
@@ -40,14 +41,17 @@ class MainActivity : ComponentActivity() {
     /**
      * Called when the activity is starting. Sets up the Compose content and theme.
      *
-     * @param savedInstanceState If the activity is being re-initialized after previously being shut down then this Bundle contains the data it most recently supplied in onSaveInstanceState(Bundle). Otherwise, it is null.
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in onSaveInstanceState(Bundle). Otherwise, it is null.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             NotesTheme {
-                androidx.compose.material3.Scaffold { innerPadding ->
+                Scaffold {
+                    innerPadding ->
                     NotesApp(innerPadding)
                 }
             }

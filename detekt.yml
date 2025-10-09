@@ -24,6 +24,8 @@ output-reports:
   exclude: []
 
 style:
+  MaxLineLength:
+    active: false
   MagicNumber:
     active: false
 

@@ -23,7 +23,7 @@
  * composable to apply consistent Material3 theming throughout the app.
  */
 
-package com.sitharaj.notes.ui.theme
+package com.sitharaj.notes.design
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
