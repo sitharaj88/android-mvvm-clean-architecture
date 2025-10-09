@@ -1,10 +1,42 @@
+# Gradle
+.gradle/
+build/
+
+# Android
 *.iml
-.gradle
-/local.properties
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
 local.properties
-/.idea
+.idea/
+captures/
+
+# APK and AAR files
+*.apk
+*.aar
+*.ap_
+*.dex
+
+# Lint
+lint-results.html
+lint-results.xml
+
+# Detekt
+detekt-report.html
+detekt-report.xml
+
+# JaCoCo
+jacoco.exec
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
