@@ -22,6 +22,8 @@ import android.content.Context
 import androidx.room.Room
 import com.sitharaj.notes.common.AndroidLogger
 import com.sitharaj.notes.common.Logger
+import com.sitharaj.notes.core.common.DefaultDispatchers
+import com.sitharaj.notes.core.common.DispatcherProvider
 import com.sitharaj.notes.data.local.NotesDatabase
 import com.sitharaj.notes.data.local.dao.NoteDao
 import com.sitharaj.notes.data.local.NoteLocalDataSource
@@ -153,4 +155,13 @@ object DataModule {
         deleteNote = DeleteNoteUseCase(repository),
         syncNotes = SyncNotesUseCase(repository)
     )
+
+    /**
+     * Provides the [DispatcherProvider] for coroutine dispatching. Exposed as a singleton so
+     * that dispatchers can be swapped in tests for deterministic execution. The default
+     * implementation provided here delegates to Kotlin's [Dispatchers].
+     */
+    @Provides
+    @Singleton
+    fun provideDispatcherProvider(): DispatcherProvider = DefaultDispatchers()
 }

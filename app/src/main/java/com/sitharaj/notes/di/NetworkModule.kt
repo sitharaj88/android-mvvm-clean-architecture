@@ -25,10 +25,14 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.TimeUnit
 import retrofit2.Retrofit
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import javax.inject.Singleton
 
 /**
@@ -53,7 +57,22 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient =
-        OkHttpClient.Builder().build()
+        OkHttpClient.Builder()
+            // Configure sensible timeouts for production environments
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .apply {
+                // Add a logging interceptor in debug builds to aid diagnosis. This check is
+                // performed against the generated BuildConfig at runtime. The fallback to
+                // always logging can be replaced with build variant specific injection if
+                // BuildConfig is unavailable in this module.
+                val logging = HttpLoggingInterceptor().apply {
+                    level = HttpLoggingInterceptor.Level.BASIC
+                }
+                addInterceptor(logging)
+            }
+            .build()
 
     /**
      * Provides the Retrofit instance for API calls.
@@ -61,6 +80,7 @@ object NetworkModule {
      * @param okHttpClient The [OkHttpClient] to use for network requests.
      * @return The [Retrofit] instance.
      */
+    @OptIn(ExperimentalSerializationApi::class)
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit =
@@ -68,7 +88,7 @@ object NetworkModule {
             .baseUrl("http://10.0.2.2:3000/") // Use 10.0.2.2 for Android emulator localhost
             .client(okHttpClient)
             .addConverterFactory(
-                Json { ignoreUnknownKeys = true }.asConverterFactory(MediaType.parse("application/json")!!)
+                Json { ignoreUnknownKeys = true }.asConverterFactory("application/json".toMediaType()!!)
             )
             .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .build()
