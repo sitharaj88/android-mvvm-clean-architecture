@@ -5,15 +5,18 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
-    id("com.google.devtools.ksp")
-    id("io.gitlab.arturbosch.detekt")
-    jacoco
-    id("org.jetbrains.dokka")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.detekt.plugin)
+    alias(libs.plugins.jacoco.plugin)
+    alias(libs.plugins.dokka.plugin)
 }
 
 android {
     namespace = "com.sitharaj.notes"
-    compileSdk = 35
+    compileSdk = 36
+    //noinspection GradleDependency
+
+    flavorDimensions += "environment"
 
     defaultConfig {
         applicationId = "com.sitharaj.notes"
@@ -23,6 +26,17 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+        }
+        create("prod") {
+            dimension = "environment"
+        }
     }
 
     buildTypes {
@@ -79,6 +93,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.core)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
@@ -100,7 +115,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
-    implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
+    implementation(libs.logging.interceptor.v520)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     testImplementation(libs.junit)
@@ -203,15 +218,15 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         "**/presentation/ui/**"
     )
     // your class directories stay the same
-    val kotlinDebugTree = fileTree("$buildDir/tmp/kotlin-classes/debug") { exclude(fileFilter) }
-    val javaDebugTree   = fileTree("$buildDir/intermediates/javac/debug/classes") { exclude(fileFilter) }
+    val kotlinDebugTree = fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/debug").get().asFile) { exclude(fileFilter) }
+    val javaDebugTree   = fileTree(layout.buildDirectory.dir("intermediates/javac/debug/classes").get().asFile) { exclude(fileFilter) }
     classDirectories.setFrom(files(kotlinDebugTree, javaDebugTree))
 
     // point source roots
     sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
 
     // **grab every exec** under build/jacoco
-    executionData.setFrom(fileTree("$buildDir/jacoco") {
+    executionData.setFrom(fileTree(layout.buildDirectory.dir("jacoco").get().asFile) {
         include("*.exec")
     })
 }
