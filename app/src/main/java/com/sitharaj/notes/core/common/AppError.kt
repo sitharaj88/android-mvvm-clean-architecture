@@ -23,7 +23,7 @@ package com.sitharaj.notes.core.common
  * Inspired by the AppError model proposed in the enterprise architecture
  * guidelines. Instances of [AppError] are generally produced by mapping
  * exceptions originating from the network, local data store or other
- * unexpected failures. See [Throwable.toAppError] in [ErrorExtensions] for
+ * unexpected failures. See [ErrorExtensions.toAppError] in [ErrorExtensions] for
  * the mapping implementation.
  */
 sealed interface AppError {

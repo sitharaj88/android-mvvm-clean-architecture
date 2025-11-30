@@ -28,6 +28,7 @@ import com.sitharaj.notes.data.local.NotesDatabase
 import com.sitharaj.notes.data.local.dao.NoteDao
 import com.sitharaj.notes.data.local.NoteLocalDataSource
 import com.sitharaj.notes.data.remote.NoteRemoteDataSource
+import com.sitharaj.notes.data.remote.NotesApiService
 import com.sitharaj.notes.data.repository.NoteRepositoryImpl
 import com.sitharaj.notes.domain.repository.NoteRepository
 import com.sitharaj.notes.domain.usecase.AddNoteUseCase
@@ -161,7 +162,7 @@ object DataModule {
     /**
      * Provides the [DispatcherProvider] for coroutine dispatching. Exposed as a singleton so
      * that dispatchers can be swapped in tests for deterministic execution. The default
-     * implementation provided here delegates to Kotlin's [Dispatchers].
+    * implementation provided here delegates to Kotlin's Dispatchers (kotlinx.coroutines.Dispatchers).
      */
     @Provides
     @Singleton

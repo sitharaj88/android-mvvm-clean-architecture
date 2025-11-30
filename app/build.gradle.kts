@@ -1,4 +1,5 @@
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
+// no-op
 
 plugins {
     alias(libs.plugins.android.application)
@@ -238,8 +239,19 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 // Configure Dokka v2 source sets and set a module display name
 dokka {
     dokkaSourceSets {
-        configureEach {
+        named("main") {
             moduleName.set("Notes App")
+
+            // If needed, you can add external documentation links here to resolve
+            // links to Kotlin stdlib and kotlinx-coroutines by adding
+            // `externalDocumentationLink { url.set(URI("https://...")) }` blocks.
+            // External documentation links were intentionally omitted:
+            // They caused script compilation issues in the Gradle Kotlin DSL in
+            // this environment. If you need external links to Kotlin stdlib or
+            // kotlinx-coroutines, re-add them after verifying the Dokka plugin
+            // and DSL compatibility (or use per-module sourceSet names).
+            // Suppress linking warnings for some generated or internal packages
+            reportUndocumented.set(false)
         }
     }
 }
