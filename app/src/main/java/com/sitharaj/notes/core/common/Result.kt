@@ -28,6 +28,16 @@ sealed class Result<out T> {
     data class Err(val error: AppError) : Result<Nothing>()
 
     /**
+     * Returns true if this result is [Ok], false otherwise.
+     */
+    val isOk: Boolean get() = this is Ok
+
+    /**
+     * Returns true if this result is [Err], false otherwise.
+     */
+    val isErr: Boolean get() = this is Err
+
+    /**
      * Maps the success value of this result using [transform]. If this
      * instance is [Err] the error is propagated unchanged.
      */
@@ -44,4 +54,115 @@ sealed class Result<out T> {
         is Ok -> this
         is Err -> Err(transform(error))
     }
+
+    /**
+     * Flat maps the success value of this result using [transform], which
+     * itself returns a Result. If this is [Err], the error is propagated.
+     */
+    inline fun <R> flatMap(transform: (T) -> Result<R>): Result<R> = when (this) {
+        is Ok -> transform(value)
+        is Err -> this
+    }
+
+    /**
+     * Returns the success value if this is [Ok], or null if this is [Err].
+     */
+    fun getOrNull(): T? = when (this) {
+        is Ok -> value
+        is Err -> null
+    }
+
+    /**
+     * Returns the success value if this is [Ok], or the [default] value if [Err].
+     */
+    inline fun getOrElse(default: () -> T): T = when (this) {
+        is Ok -> value
+        is Err -> default()
+    }
+
+    /**
+     * Returns the error if this is [Err], or null if this is [Ok].
+     */
+    fun errorOrNull(): AppError? = when (this) {
+        is Ok -> null
+        is Err -> error
+    }
+
+    /**
+     * Executes [block] if this is [Ok], returning this result unchanged.
+     * Useful for side effects like logging.
+     */
+    inline fun onSuccess(block: (T) -> Unit): Result<T> {
+        if (this is Ok) block(value)
+        return this
+    }
+
+    /**
+     * Executes [block] if this is [Err], returning this result unchanged.
+     * Useful for side effects like logging.
+     */
+    inline fun onFailure(block: (AppError) -> Unit): Result<T> {
+        if (this is Err) block(error)
+        return this
+    }
+
+    /**
+     * Folds this result into a single value using [onSuccess] for Ok
+     * or [onFailure] for Err.
+     */
+    inline fun <R> fold(
+        onSuccess: (T) -> R,
+        onFailure: (AppError) -> R
+    ): R = when (this) {
+        is Ok -> onSuccess(value)
+        is Err -> onFailure(error)
+    }
+
+    /**
+     * Recovers from an error by calling [recovery] if this is [Err].
+     * If this is [Ok], returns this result unchanged.
+     */
+    inline fun recover(recovery: (AppError) -> T): Result<T> = when (this) {
+        is Ok -> this
+        is Err -> Ok(recovery(error))
+    }
+
+    /**
+     * Recovers from an error by calling [recovery] if this is [Err],
+     * where recovery itself returns a Result. If this is [Ok], returns
+     * this result unchanged.
+     */
+    inline fun recoverCatching(recovery: (AppError) -> Result<T>): Result<T> = when (this) {
+        is Ok -> this
+        is Err -> recovery(error)
+    }
+
+    companion object {
+        /**
+         * Creates a Result by catching any exception thrown by [block]
+         * and converting it to AppError.
+         */
+        inline fun <T> catching(block: () -> T): Result<T> = try {
+            Ok(block())
+        } catch (t: Throwable) {
+            Err(t.toAppError())
+        }
+
+        /**
+         * Wraps a value in a successful Result.
+         */
+        fun <T> success(value: T): Result<T> = Ok(value)
+
+        /**
+         * Wraps an error in a failed Result.
+         */
+        fun <T> failure(error: AppError): Result<T> = Err(error)
+    }
+}
+
+/**
+ * Extension to convert Throwable to AppError. Requires ErrorExtensions import.
+ */
+private fun Throwable.toAppError(): AppError {
+    return ErrorExtensions.toAppError(this)
 }

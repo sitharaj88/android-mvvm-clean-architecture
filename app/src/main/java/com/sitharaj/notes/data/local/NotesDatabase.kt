@@ -24,16 +24,29 @@ import com.sitharaj.notes.data.local.dao.NoteDao
 import com.sitharaj.notes.data.local.entity.NoteEntity
 
 /**
- * Represents the local database for storing notes.
+ * Represents the local database for storing notes with optimized schema.
  *
  * This database contains a single table for notes, defined by the [NoteEntity] class.
  * It provides access to the [NoteDao] for performing CRUD operations on notes.
+ *
+ * Version History:
+ * - v1: Initial schema
+ * - v2: Added indexes for performance optimization
+ *
+ * Performance Optimizations:
+ * - Indexes on timestamp, syncState, lastModified, and title columns
+ * - Optimized queries for common operations (list, search, sync)
  *
  * @author Sitharaj Seenivasan
  * @date 22 Jun 2025
  * @since 1.0.0
  */
-@Database(entities = [NoteEntity::class], version = 1, exportSchema = false)
+@Database(
+    entities = [NoteEntity::class],
+    version = 2,
+    exportSchema = true,
+    autoMigrations = []
+)
 abstract class NotesDatabase : RoomDatabase() {
     /**
      * Provides access to the [NoteDao] for performing operations on notes.

@@ -18,6 +18,7 @@
 
 package com.sitharaj.notes.domain.repository
 
+import com.sitharaj.notes.core.common.Result
 import com.sitharaj.notes.domain.model.Note
 import kotlinx.coroutines.flow.Flow
 
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.Flow
  * Repository interface for managing notes in the Notes application.
  *
  * Provides methods for retrieving, adding, updating, deleting, and synchronizing notes.
+ * All operations that can fail return [Result] to handle errors explicitly.
  *
  * @author Sitharaj Seenivasan
  * @date 22 Jun 2025
@@ -32,43 +34,53 @@ import kotlinx.coroutines.flow.Flow
  */
 interface NoteRepository {
     /**
-     * Returns a [Flow] of all notes.
+     * Returns a [Flow] of all notes wrapped in [Result].
+     * The flow emits [Result.Ok] with the list of notes on success,
+     * or [Result.Err] if an error occurs.
      *
-     * @return [Flow] emitting the list of [Note]s.
+     * @return [Flow] emitting [Result] containing the list of [Note]s.
      */
-    fun getNotes(): Flow<List<Note>>
+    fun getNotes(): Flow<Result<List<Note>>>
 
     /**
-     * Returns a note by its id, or null if not found.
+     * Returns a note by its id wrapped in [Result].
      *
      * @param id The id of the note to retrieve.
-     * @return The [Note] with the given id, or null if not found.
+     * @return [Result.Ok] containing the [Note] if found,
+     *         [Result.Err] with [AppError.Data.NotFound] if not found,
+     *         or [Result.Err] with another error if the operation fails.
      */
-    suspend fun getNoteById(id: Int): Note?
+    suspend fun getNoteById(id: Int): Result<Note>
 
     /**
      * Adds a new note.
      *
      * @param note The [Note] to add.
+     * @return [Result.Ok] with Unit on success, or [Result.Err] on failure.
      */
-    suspend fun addNote(note: Note)
+    suspend fun addNote(note: Note): Result<Unit>
 
     /**
      * Updates an existing note.
      *
      * @param note The [Note] to update.
+     * @return [Result.Ok] with Unit on success, or [Result.Err] on failure.
      */
-    suspend fun updateNote(note: Note)
+    suspend fun updateNote(note: Note): Result<Unit>
 
     /**
      * Deletes a note.
      *
      * @param note The [Note] to delete.
+     * @return [Result.Ok] with Unit on success, or [Result.Err] on failure.
      */
-    suspend fun deleteNote(note: Note)
+    suspend fun deleteNote(note: Note): Result<Unit>
 
     /**
      * Synchronizes notes with the remote server or data source.
+     *
+     * @return [Result.Ok] with Unit on successful sync,
+     *         or [Result.Err] with network/sync errors on failure.
      */
-    suspend fun syncNotes()
+    suspend fun syncNotes(): Result<Unit>
 }

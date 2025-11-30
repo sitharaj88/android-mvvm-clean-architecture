@@ -59,7 +59,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
     /**
-     * Provides the Room database instance for notes.
+     * Provides the Room database instance for notes with migrations.
      *
      * @param context The application context.
      * @return The [NotesDatabase] instance.
@@ -67,7 +67,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): NotesDatabase =
-        Room.databaseBuilder(context, NotesDatabase::class.java, "notes_db").build()
+        Room.databaseBuilder(context, NotesDatabase::class.java, "notes_db")
+            .addMigrations(*com.sitharaj.notes.data.local.DatabaseMigrations.getAllMigrations())
+            .build()
 
     /**
      * Provides the DAO for accessing notes in the database.

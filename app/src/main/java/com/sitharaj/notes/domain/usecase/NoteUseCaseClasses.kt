@@ -18,8 +18,11 @@
 
 package com.sitharaj.notes.domain.usecase
 
+import com.sitharaj.notes.core.common.AppError
+import com.sitharaj.notes.core.common.Result
 import com.sitharaj.notes.domain.model.Note
 import com.sitharaj.notes.domain.repository.NoteRepository
+import com.sitharaj.notes.domain.validator.NoteValidator
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -28,10 +31,10 @@ import kotlinx.coroutines.flow.Flow
  */
 class GetNotesUseCase(private val repository: NoteRepository) {
     /**
-     * Invokes the use case to get all notes.
-     * @return A Flow emitting the list of notes.
+     * Invokes the use case to get all notes wrapped in Result.
+     * @return A Flow emitting Result containing the list of notes.
      */
-    operator fun invoke(): Flow<List<Note>> = repository.getNotes()
+    operator fun invoke(): Flow<Result<List<Note>>> = repository.getNotes()
 }
 
 /**
@@ -42,33 +45,65 @@ class GetNoteByIdUseCase(private val repository: NoteRepository) {
     /**
      * Invokes the use case to get a note by ID.
      * @param id The ID of the note.
-     * @return The note if found, or null.
+     * @return Result containing the note if found, or an error.
      */
-    suspend operator fun invoke(id: Int): Note? = repository.getNoteById(id)
+    suspend operator fun invoke(id: Int): Result<Note> {
+        if (id <= 0) {
+            return Result.failure(
+                AppError.Domain(
+                    code = "INVALID_NOTE_ID",
+                    message = "Note ID must be a positive integer"
+                )
+            )
+        }
+        return repository.getNoteById(id)
+    }
 }
 
 /**
- * Use case for adding a new note.
+ * Use case for adding a new note with domain validation.
  * @property repository The repository to add the note to.
+ * @property validator Validates note business rules.
  */
-class AddNoteUseCase(private val repository: NoteRepository) {
+class AddNoteUseCase(
+    private val repository: NoteRepository,
+    private val validator: NoteValidator = NoteValidator()
+) {
     /**
-     * Invokes the use case to add a note.
+     * Invokes the use case to add a note after validation.
      * @param note The note to add.
+     * @return Result.Ok on success, Result.Err if validation or persistence fails.
      */
-    suspend operator fun invoke(note: Note) = repository.addNote(note)
+    suspend operator fun invoke(note: Note): Result<Unit> {
+        // Validate note before adding
+        return when (val validationResult = validator.validate(note)) {
+            is Result.Err -> validationResult
+            is Result.Ok -> repository.addNote(note)
+        }
+    }
 }
 
 /**
- * Use case for updating an existing note.
+ * Use case for updating an existing note with domain validation.
  * @property repository The repository to update the note in.
+ * @property validator Validates note business rules.
  */
-class UpdateNoteUseCase(private val repository: NoteRepository) {
+class UpdateNoteUseCase(
+    private val repository: NoteRepository,
+    private val validator: NoteValidator = NoteValidator()
+) {
     /**
-     * Invokes the use case to update a note.
+     * Invokes the use case to update a note after validation.
      * @param note The note to update.
+     * @return Result.Ok on success, Result.Err if validation or persistence fails.
      */
-    suspend operator fun invoke(note: Note) = repository.updateNote(note)
+    suspend operator fun invoke(note: Note): Result<Unit> {
+        // Validate note before updating
+        return when (val validationResult = validator.validate(note)) {
+            is Result.Err -> validationResult
+            is Result.Ok -> repository.updateNote(note)
+        }
+    }
 }
 
 /**
@@ -79,8 +114,19 @@ class DeleteNoteUseCase(private val repository: NoteRepository) {
     /**
      * Invokes the use case to delete a note.
      * @param note The note to delete.
+     * @return Result.Ok on success, Result.Err on failure.
      */
-    suspend operator fun invoke(note: Note) = repository.deleteNote(note)
+    suspend operator fun invoke(note: Note): Result<Unit> {
+        if (note.id <= 0) {
+            return Result.failure(
+                AppError.Domain(
+                    code = "INVALID_NOTE_ID",
+                    message = "Cannot delete note with invalid ID"
+                )
+            )
+        }
+        return repository.deleteNote(note)
+    }
 }
 
 /**
@@ -90,6 +136,7 @@ class DeleteNoteUseCase(private val repository: NoteRepository) {
 class SyncNotesUseCase(private val repository: NoteRepository) {
     /**
      * Invokes the use case to sync notes.
+     * @return Result.Ok on successful sync, Result.Err on failure.
      */
-    suspend operator fun invoke() = repository.syncNotes()
+    suspend operator fun invoke(): Result<Unit> = repository.syncNotes()
 }
