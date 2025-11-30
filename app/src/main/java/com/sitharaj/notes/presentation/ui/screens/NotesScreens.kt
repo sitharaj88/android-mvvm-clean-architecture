@@ -67,11 +67,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
 import java.util.Locale
 import com.sitharaj.notes.domain.model.Note
-import com.sitharaj.notes.data.local.entity.SyncState
+import com.sitharaj.notes.presentation.state.SyncUiState
 import com.sitharaj.notes.presentation.viewmodel.NotesViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
+import com.sitharaj.notes.presentation.state.NotesUiState
 
 /**
  * Root composable for the Notes application, setting up navigation and the main screens.
@@ -107,8 +108,7 @@ fun NotesApp(innerPadding: PaddingValues = PaddingValues()) {
 @Composable
 @Suppress("FunctionNaming")
 fun NotesListScreen(navController: NavHostController, viewModel: NotesViewModel = hiltViewModel()) {
-    val notes by viewModel.notes.collectAsState()
-    val syncState by viewModel.syncState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -122,26 +122,81 @@ fun NotesListScreen(navController: NavHostController, viewModel: NotesViewModel 
             }
         },
         bottomBar = {
-            SyncStatusBar(syncState)
+            if (uiState is NotesUiState.Success) {
+                val successState = uiState as NotesUiState.Success
+                SyncStatusBar(successState.syncState)
+            }
         }
     ) { padding ->
-        if (notes.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("No notes yet. Tap + to add one.", color = Color.Gray)
+        when (uiState) {
+            is NotesUiState.Initial -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Initializing...", color = Color.Gray)
+                }
             }
-        } else {
-            LazyColumn(modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)) {
-                items(notes) { note ->
-                    NoteCard(note = note, onClick = {
-                        navController.navigate("note_edit/${note.id}")
-                    })
+            is NotesUiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Loading notes...", color = Color.Gray)
+                }
+            }
+            is NotesUiState.Success -> {
+                val successState = uiState as NotesUiState.Success
+                if (successState.notes.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No notes yet. Tap + to add one.", color = Color.Gray)
+                    }
+                } else {
+                    LazyColumn(modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)) {
+                        items(successState.notes) { note ->
+                            NoteCard(note = note, onClick = {
+                                navController.navigate("note_edit/${note.id}")
+                            })
+                        }
+                    }
+                }
+            }
+            is NotesUiState.Error -> {
+                val errorState = uiState as NotesUiState.Error
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Error: ${errorState.error.message}", color = Color.Red)
+                        if (errorState.canRetry) {
+                            Text("Tap to retry", color = Color.Blue, modifier = Modifier.clickable { viewModel.retry() })
+                        }
+                    }
+                }
+            }
+            is NotesUiState.Empty -> {
+                val emptyState = uiState as NotesUiState.Empty
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(emptyState.message, color = Color.Gray)
                 }
             }
         }
@@ -190,16 +245,15 @@ fun NoteCard(note: Note, onClick: () -> Unit) {
 /**
  * Composable for displaying the sync status bar at the bottom of the screen.
  *
- * @param syncState The current [SyncState] to display.
+ * @param syncState The current [SyncUiState] to display.
  */
 @Composable
 @Suppress("FunctionNaming")
-fun SyncStatusBar(syncState: SyncState) {
+fun SyncStatusBar(syncState: SyncUiState) {
     val (text, color) = when (syncState) {
-        SyncState.SYNCED -> "All changes synced" to Color(0xFF388E3C)
-        SyncState.PENDING -> "Syncing..." to Color(0xFF1976D2)
-        SyncState.FAILED -> "Sync failed. Will retry." to Color(0xFFD32F2F)
-        SyncState.DELETED -> "Deleting..." to Color(0xFFFBC02D)
+        SyncUiState.Synced -> "All changes synced" to Color(0xFF388E3C)
+        is SyncUiState.Syncing -> "Syncing..." to Color(0xFF1976D2)
+        is SyncUiState.Failed -> "Sync failed. Will retry." to Color(0xFFD32F2F)
     }
     Surface(color = color, modifier = Modifier.fillMaxWidth()) {
         Text(

@@ -28,6 +28,39 @@ style:
     active: false
   MagicNumber:
     active: false
+  ReturnCount:
+    active: true
+    max: 10
+
+complexity:
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 15
+    thresholdInClasses: 15
+    thresholdInInterfaces: 15
+    thresholdInObjects: 15
+    thresholdInEnums: 15
+    ignoreDeprecated: false
+    ignorePrivate: false
+    ignoreOverridden: false
+  LongMethod:
+    active: true
+    threshold: 100
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 30
+
+performance:
+  SpreadOperator:
+    active: false
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: false
+  SwallowedException:
+    active: false
+  TooGenericExceptionThrown:
+    active: false
 
 compose:
   ReusedModifierInstance:
@@ -52,9 +85,3 @@ compose:
   ConditionCouldBeLifted:
     active: true
     ignoreCallsWithArgumentNames: [ 'modifier', 'contentAlignment' ]
-
-exceptions:
-  TooGenericExceptionCaught:
-    active: false
-  SwallowedException:
-    active: false

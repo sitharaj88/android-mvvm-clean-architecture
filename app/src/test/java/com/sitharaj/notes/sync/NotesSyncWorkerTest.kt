@@ -44,7 +44,7 @@ class NotesSyncWorkerTest {
 
     @Test
     fun `doWork returns success when sync succeeds`() = runBlocking {
-        coEvery { repository.syncNotes() } returns Unit
+        coEvery { repository.syncNotes() } returns com.sitharaj.notes.core.common.Result.success(Unit)
         val result = worker.doWork()
         assertEquals(ListenableWorker.Result.success(), result)
         coVerify { repository.syncNotes() }

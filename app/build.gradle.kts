@@ -184,7 +184,11 @@ apply(plugin = "jacoco")
 
 tasks.register<JacocoReport>("jacocoTestReport") {
     // make sure we run both plain and variant tests
-    dependsOn("testDebugUnitTest", "test")
+    val deps = mutableListOf("test")
+    if (tasks.findByName("testDebugUnitTest") != null) {
+        deps.add("testDebugUnitTest")
+    }
+    dependsOn(deps)
 
     reports {
         xml.required.set(true)

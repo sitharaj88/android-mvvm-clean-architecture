@@ -198,7 +198,7 @@ class NoteRepositoryImpl(
      * @param entity The [NoteEntity] to sync.
      * @return [Result.Ok] on success, [Result.Err] on failure.
      */
-    private suspend fun syncPendingEntity(entity: NoteEntity): Result<Unit> = SafeCall.safeHttp {
+    private suspend fun syncPendingEntity(entity: NoteEntity): Result<Unit> = SafeCall.safeHttp(block = {
         val now = System.currentTimeMillis()
         val dto = entity.toDto().copy(lastModified = now)
 
@@ -210,7 +210,7 @@ class NoteRepositoryImpl(
 
         local.noteDao.updateSyncState(entity.id, SyncState.SYNCED)
         local.updateNote(entity.copy(lastSynced = now, syncState = SyncState.SYNCED))
-    }.onFailure { error ->
+    }).onFailure { error ->
         logger.e(
             "NoteRepositoryImpl",
             "Failed to sync pending note ${entity.id}: ${error.message}"
@@ -223,10 +223,10 @@ class NoteRepositoryImpl(
      * @param entity The [NoteEntity] to delete.
      * @return [Result.Ok] on success, [Result.Err] on failure.
      */
-    private suspend fun deleteRemoteEntity(entity: NoteEntity): Result<Unit> = SafeCall.safeHttp {
+    private suspend fun deleteRemoteEntity(entity: NoteEntity): Result<Unit> = SafeCall.safeHttp(block = {
         remote.deleteNote(entity.id)
         local.noteDao.deleteNote(entity)
-    }.onFailure { error ->
+    }).onFailure { error ->
         logger.e(
             "NoteRepositoryImpl",
             "Failed to delete note ${entity.id}: ${error.message}"
@@ -239,7 +239,7 @@ class NoteRepositoryImpl(
      *
      * @return [Result.Ok] on success, [Result.Err] on failure.
      */
-    private suspend fun mergeRemoteNotes(): Result<Unit> = SafeCall.safeHttp {
+    private suspend fun mergeRemoteNotes(): Result<Unit> = SafeCall.safeHttp(block = {
         val remoteNotes = remote.getNotes()
         val remoteEntities = remoteNotes.map { it.toEntity(SyncState.SYNCED) }
 
@@ -251,7 +251,7 @@ class NoteRepositoryImpl(
                 local.insertNote(remoteEntity)
             }
         }
-    }.onFailure { error ->
+    }).onFailure { error ->
         logger.e("NoteRepositoryImpl", "Failed to merge remote notes: ${error.message}")
     }
 }

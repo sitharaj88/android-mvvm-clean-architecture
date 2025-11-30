@@ -82,7 +82,9 @@ class NoteRepositoryImplTest {
         noteDao.insertNote(keep)
         noteDao.insertNote(gone)
 
-        val notes = repository.getNotes().first()
+        val notesResult = repository.getNotes().first()
+        require(notesResult is com.sitharaj.notes.core.common.Result.Ok)
+        val notes = (notesResult as com.sitharaj.notes.core.common.Result.Ok).value
         assertEquals(1, notes.size)
         assertEquals(1, notes[0].id)
     }
@@ -131,8 +133,10 @@ class NoteRepositoryImplTest {
         noteDao.insertNote(keep)
         noteDao.insertNote(remove)
 
-        val notes = repository.getNotes().first()
-        assertTrue(notes.none { it.id == 7 })
-        assertTrue(notes.any    { it.id == 6 })
+        val notesResult2 = repository.getNotes().first()
+        require(notesResult2 is com.sitharaj.notes.core.common.Result.Ok)
+        val notes2 = (notesResult2 as com.sitharaj.notes.core.common.Result.Ok).value
+        assertTrue(notes2.none { it.id == 7 })
+        assertTrue(notes2.any    { it.id == 6 })
     }
 }

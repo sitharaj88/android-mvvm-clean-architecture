@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.sitharaj.notes.design"
-    compileSdk = 35
+    compileSdk = 36
 
     flavorDimensions += "environment"
 

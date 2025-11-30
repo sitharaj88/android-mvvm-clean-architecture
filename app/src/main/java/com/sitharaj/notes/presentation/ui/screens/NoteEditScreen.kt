@@ -56,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.sitharaj.notes.domain.model.Note
 import com.sitharaj.notes.presentation.viewmodel.NotesViewModel
+import com.sitharaj.notes.presentation.state.NotesUiState
 
 /**
  * Composable screen for adding or editing a note in the Notes application.
@@ -79,7 +80,8 @@ fun NoteEditScreen(
     noteId: Int?,
     viewModel: NotesViewModel = hiltViewModel()
 ) {
-    val notes by viewModel.notes.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val notes = (uiState as? NotesUiState.Success)?.notes ?: emptyList()
     val note = remember(notes, noteId) { notes.find { it.id == noteId } ?: Note(title = "", content = "") }
     val maxTitleLength = 50
     val maxContentLength = 1000

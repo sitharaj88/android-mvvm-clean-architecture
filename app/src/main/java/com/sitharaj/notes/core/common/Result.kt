@@ -14,6 +14,8 @@
 
 package com.sitharaj.notes.core.common
 
+import com.sitharaj.notes.core.common.ErrorExtensions.toAppError
+
 /**
  * A simple result wrapper representing either a successful value of type [T]
  * or a failure represented by an [AppError]. This wrapper helps
@@ -75,7 +77,7 @@ sealed class Result<out T> {
     /**
      * Returns the success value if this is [Ok], or the [default] value if [Err].
      */
-    inline fun getOrElse(default: () -> T): T = when (this) {
+    inline fun getOrElse(default: () -> @UnsafeVariance T): T = when (this) {
         is Ok -> value
         is Err -> default()
     }
@@ -122,7 +124,7 @@ sealed class Result<out T> {
      * Recovers from an error by calling [recovery] if this is [Err].
      * If this is [Ok], returns this result unchanged.
      */
-    inline fun recover(recovery: (AppError) -> T): Result<T> = when (this) {
+    inline fun recover(recovery: (AppError) -> @UnsafeVariance T): Result<T> = when (this) {
         is Ok -> this
         is Err -> Ok(recovery(error))
     }
@@ -132,7 +134,7 @@ sealed class Result<out T> {
      * where recovery itself returns a Result. If this is [Ok], returns
      * this result unchanged.
      */
-    inline fun recoverCatching(recovery: (AppError) -> Result<T>): Result<T> = when (this) {
+    inline fun recoverCatching(recovery: (AppError) -> Result<@UnsafeVariance T>): Result<T> = when (this) {
         is Ok -> this
         is Err -> recovery(error)
     }
@@ -160,9 +162,7 @@ sealed class Result<out T> {
     }
 }
 
-/**
- * Extension to convert Throwable to AppError. Requires ErrorExtensions import.
- */
-private fun Throwable.toAppError(): AppError {
-    return ErrorExtensions.toAppError(this)
-}
+// The `ErrorExtensions` object exposes a `toAppError` extension function
+// with the HTTP code option. We import it above and reuse it throughout
+// the codebase so we avoid duplicate top-level extensions and accidental
+// visibility mismatches with public inline functions.
