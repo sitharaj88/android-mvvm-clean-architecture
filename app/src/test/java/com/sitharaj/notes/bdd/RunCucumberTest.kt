@@ -5,5 +5,13 @@ import io.cucumber.junit.CucumberOptions
 import org.junit.runner.RunWith
 
 @RunWith(Cucumber::class)
-@CucumberOptions(features = ["src/test/resources/features"], glue = ["com.sitharaj.notes.bdd"], plugin = ["pretty"])
+@CucumberOptions(
+	features = ["src/test/resources/features"],
+	glue = ["com.sitharaj.notes.bdd"],
+	plugin = [
+		"pretty",
+		"json:build/reports/cucumber/cucumber.json",
+		"html:build/reports/cucumber/html"
+	]
+)
 class RunCucumberTest
