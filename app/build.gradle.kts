@@ -235,6 +235,11 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     })
 }
 
-tasks.dokkaHtml.configure {
-    moduleName.set("Notes App")
+// Configure Dokka v2 source sets and set a module display name
+dokka {
+    dokkaSourceSets {
+        configureEach {
+            moduleName.set("Notes App")
+        }
+    }
 }

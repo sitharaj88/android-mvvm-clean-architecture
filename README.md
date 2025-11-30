@@ -1,38 +1,27 @@
 # Notes App
 
-A modern, production-ready Android notes application built with Kotlin, Jetpack Compose, and a robust Clean Architecture approach. This project is designed for scalability, maintainability, and high code quality, leveraging the latest Android development best practices and tooling.
-
----
+  ./gradlew dokkaGenerateHtml
 
 ## Table of Contents
 - [Project Overview](#project-overview)
 - [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Key Libraries & Tools](#key-libraries--tools)
 - [Code Quality](#code-quality)
 - [How to Build & Run](#how-to-build--run)
 - [How to Run Code Quality Tools](#how-to-run-code-quality-tools)
 - [Documentation](#documentation)
 - [License](#license)
-
 ---
 
-## Project Overview
 Notes App is a simple yet powerful note-taking application. It demonstrates:
 - **MVVM (Model-View-ViewModel) pattern** for clear separation of concerns
-- **Clean Architecture** for modular, testable, and maintainable code
+  ./gradlew clean build jacocoTestReport dokkaGenerateHtml detekt
 - **Jetpack Compose** for modern, declarative UI
-- **Room** for local data persistence
 - **Hilt** for dependency injection
 - **Navigation Component** for seamless navigation
 
 ---
-
 ## Architecture
 This project follows the principles of **Clean Architecture** and **MVVM**:
-
-- **Presentation Layer**: UI (Jetpack Compose) and ViewModels
-- **Domain Layer**: Use cases and business logic
 - **Data Layer**: Repositories, Room database, and data sources
 
 This separation ensures testability, scalability, and maintainability.
@@ -84,7 +73,7 @@ This project uses several tools to ensure code quality and maintainability:
 - **Purpose**: Generates HTML documentation from Kotlin source and KDoc comments
 - **How to run**:
   ```sh
-  ./gradlew dokkaHtml
+  ./gradlew dokkaGenerateHtml
   # Docs: app/build/dokka/html/index.html
   ```
 
@@ -113,7 +102,7 @@ This project uses several tools to ensure code quality and maintainability:
 ## How to Run Code Quality Tools
 - **Run all checks**:
   ```sh
-  ./gradlew clean build jacocoTestReport dokkaHtml detekt
+  ./gradlew clean build jacocoTestReport dokkaGenerateHtml detekt
   ```
 - **View reports**:
   - JaCoCo: `app/build/reports/jacoco`
@@ -124,7 +113,7 @@ This project uses several tools to ensure code quality and maintainability:
 
 ## Documentation
 - **Dokka** generates API documentation from your KDoc comments.
-- After running `./gradlew dokkaHtml`, open `app/build/dokka/html/index.html` in your browser.
+After running `./gradlew dokkaGenerateHtml`, open `app/build/dokka/html/index.html` in your browser.
 
 ---
 
