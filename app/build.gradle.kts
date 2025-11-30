@@ -148,6 +148,9 @@ dependencies {
     // Testing
     testImplementation(libs.robolectric)
     testImplementation(libs.junit)
+    testImplementation(libs.cucumber.junit)
+    testImplementation(libs.cucumber.java)
+    // Not using cucumber-kotlin artifact to improve compatibility; use cucumber-java and cucumber-junit instead.
     testImplementation(libs.mockito.core)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
