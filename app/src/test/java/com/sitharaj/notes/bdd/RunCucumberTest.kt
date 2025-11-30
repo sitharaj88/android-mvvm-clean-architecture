@@ -11,7 +11,8 @@ import org.junit.runner.RunWith
 	plugin = [
 		"pretty",
 		"json:build/reports/cucumber/cucumber.json",
-		"html:build/reports/cucumber/html"
+		// Explicitly write a file with .html extension to avoid creating a raw 'html' file
+		"html:build/reports/cucumber/cucumber.html"
 	]
 )
 class RunCucumberTest
