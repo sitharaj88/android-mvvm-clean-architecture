@@ -8,4 +8,6 @@ android {
 
 dependencies {
     implementation(libs.bundles.coroutines)
+
+    testImplementation(project(":core:testing"))
 }

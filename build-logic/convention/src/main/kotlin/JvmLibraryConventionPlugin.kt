@@ -8,6 +8,7 @@ class JvmLibraryConventionPlugin : Plugin<Project> {
             with(pluginManager) {
                 apply("org.jetbrains.kotlin.jvm")
                 apply("notes.detekt")
+                apply("notes.kover")
             }
             configureKotlinJvm()
         }

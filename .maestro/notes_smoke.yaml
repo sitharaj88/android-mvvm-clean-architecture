@@ -1,0 +1,28 @@
+# Maestro end-to-end smoke flow for the Notes app.
+# Run with:  maestro test .maestro/notes_smoke.yaml
+# Targets the dev debug build (applicationId com.sitharaj.notes.dev); change appId for prod.
+appId: com.sitharaj.notes.dev
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Notes"
+# Create a note
+- tapOn:
+    id: "Add Note"            # FAB contentDescription
+- assertVisible: "Add Note"   # edit screen title
+- tapOn: "Title"
+- inputText: "Buy groceries"
+- tapOn: "Content"
+- inputText: "Milk, eggs, bread"
+- tapOn:
+    id: "Save"
+# Back on the list, the new note is visible
+- assertVisible: "Buy groceries"
+# Open settings and switch to dark theme
+- tapOn:
+    id: "Settings"
+- assertVisible: "Theme"
+- tapOn: "Dark"
+- tapOn:
+    id: "Back"
+- assertVisible: "Notes"

@@ -59,5 +59,9 @@ gradlePlugin {
             id = "notes.detekt"
             implementationClass = "DetektConventionPlugin"
         }
+        register("kover") {
+            id = "notes.kover"
+            implementationClass = "KoverConventionPlugin"
+        }
     }
 }
