@@ -22,4 +22,10 @@ dependencyResolutionManagement {
 
 rootProject.name = "Notes"
 include(":app")
-include(":design")
+include(":core:designsystem")
+include(":core:model")
+include(":core:common")
+include(":core:domain")
+include(":core:database")
+include(":core:network")
+include(":core:data")
