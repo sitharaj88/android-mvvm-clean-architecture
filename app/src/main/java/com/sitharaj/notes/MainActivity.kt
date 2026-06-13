@@ -22,15 +22,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.sitharaj.notes.presentation.ui.screens.NotesApp
-import com.sitharaj.notes.design.NotesTheme
-import dagger.hilt.android.AndroidEntryPoint
+import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import com.sitharaj.notes.core.datastore.DarkThemeConfig
+import com.sitharaj.notes.design.NotesTheme
+import com.sitharaj.notes.navigation.NotesNavDisplay
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * The main entry point for the Notes application.
  *
- * This activity sets up the Compose UI, applies the app theme, and hosts the navigation graph.
+ * Sets up the Compose UI, applies the user-selected theme (observed from DataStore) and hosts
+ * the Navigation 3 display.
  *
  * @author Sitharaj Seenivasan
  * @date 22 Jun 2025
@@ -38,21 +46,26 @@ import androidx.compose.material3.Scaffold
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    /**
-     * Called when the activity is starting. Sets up the Compose content and theme.
-     *
-     * @param savedInstanceState If the activity is being re-initialized after
-     *     previously being shut down then this Bundle contains the data it most
-     *     recently supplied in onSaveInstanceState(Bundle). Otherwise, it is null.
-     */
+
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            NotesTheme {
-                Scaffold {
-                    innerPadding ->
-                    NotesApp(innerPadding)
+            val uiState by viewModel.uiState.collectAsState()
+            val preferences = (uiState as? MainUiState.Success)?.preferences
+            val darkTheme = when (preferences?.darkThemeConfig) {
+                DarkThemeConfig.LIGHT -> false
+                DarkThemeConfig.DARK -> true
+                else -> isSystemInDarkTheme()
+            }
+            NotesTheme(
+                darkTheme = darkTheme,
+                dynamicColor = preferences?.useDynamicColor ?: true
+            ) {
+                Scaffold { innerPadding ->
+                    NotesNavDisplay(modifier = Modifier.padding(innerPadding))
                 }
             }
         }

@@ -4,6 +4,7 @@ plugins {
     id("notes.android.application")
     id("notes.android.application.compose")
     id("notes.android.hilt")
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.jacoco.plugin)
     alias(libs.plugins.dokka.plugin)
 }
@@ -70,6 +71,16 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:database"))
     implementation(project(":core:network"))
+    implementation(project(":core:datastore"))
+    implementation(project(":feature:notes"))
+    implementation(project(":feature:settings"))
+
+    // Navigation 3 — developer-owned back stack hosted in :app.
+    // navigation3-ui transitively provides an AGP-8.13-compatible ViewModel-scoping
+    // decorator; pinning lifecycle-viewmodel-navigation3 explicitly would drag in
+    // lifecycle 2.11 (needs compileSdk 37 / AGP 9.1), so it is intentionally omitted.
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

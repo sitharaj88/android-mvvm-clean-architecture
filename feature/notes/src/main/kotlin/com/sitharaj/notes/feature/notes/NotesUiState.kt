@@ -16,7 +16,7 @@
  * @version 1.0.0
  */
 
-package com.sitharaj.notes.presentation.state
+package com.sitharaj.notes.feature.notes
 
 import com.sitharaj.notes.core.common.AppError
 import com.sitharaj.notes.domain.model.Note

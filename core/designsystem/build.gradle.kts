@@ -6,15 +6,8 @@ plugins {
 android {
     namespace = "com.sitharaj.notes.design"
 
-    flavorDimensions += "environment"
-
     defaultConfig {
         consumerProguardFiles("consumer-rules.pro")
-    }
-
-    productFlavors {
-        create("dev") { dimension = "environment" }
-        create("prod") { dimension = "environment" }
     }
 }
 

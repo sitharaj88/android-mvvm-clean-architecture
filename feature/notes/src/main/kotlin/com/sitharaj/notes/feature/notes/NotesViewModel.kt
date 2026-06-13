@@ -16,17 +16,12 @@
  * @version 1.0.0
  */
 
-package com.sitharaj.notes.presentation.viewmodel
+package com.sitharaj.notes.feature.notes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sitharaj.notes.core.common.Result
 import com.sitharaj.notes.domain.model.Note
 import com.sitharaj.notes.domain.usecase.NoteUseCases
-import com.sitharaj.notes.presentation.state.NoteUiEvent
-import com.sitharaj.notes.presentation.state.NotesUiState
-import com.sitharaj.notes.presentation.state.SyncUiState
-import com.sitharaj.notes.presentation.state.UiError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

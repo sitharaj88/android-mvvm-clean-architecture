@@ -16,7 +16,7 @@
  * @version 1.0.0
  */
 
-package com.sitharaj.notes.presentation.ui.screens
+package com.sitharaj.notes.feature.notes
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,7 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
@@ -53,31 +53,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.sitharaj.notes.domain.model.Note
-import com.sitharaj.notes.presentation.viewmodel.NotesViewModel
-import com.sitharaj.notes.presentation.state.NotesUiState
 
 /**
- * Composable screen for adding or editing a note in the Notes application.
+ * Screen for adding or editing a note. Navigation back is delegated to the host via [onBack]
+ * so the feature stays decoupled from the navigation library.
  *
- * This screen provides a UI for creating a new note or editing an existing one, including
- * title and content fields, save and delete actions, and a confirmation dialog for deletion.
- *
- * @param navController The navigation controller for navigating between screens.
  * @param noteId The id of the note to edit, or null/0 for a new note.
+ * @param onBack Invoked to navigate back after save/delete/cancel.
  * @param viewModel The [NotesViewModel] providing note data and actions (default: Hilt-injected).
- *
- * @author Sitharaj Seenivasan
- * @date 22 Jun 2025
- * @version 1.0.0
  */
 @Suppress("FunctionNaming", "LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteEditScreen(
-    navController: NavHostController,
     noteId: Int?,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: NotesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -91,12 +83,13 @@ fun NoteEditScreen(
     val isEditing = noteId != null && noteId != 0 && notes.any { it.id == noteId }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(if (isEditing) "Edit Note" else "Add Note") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -121,7 +114,7 @@ fun NoteEditScreen(
                     } else {
                         viewModel.addNote(updatedNote)
                     }
-                    navController.popBackStack()
+                    onBack()
                 },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
@@ -139,9 +132,7 @@ fun NoteEditScreen(
             Box(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     value = title,
-                    onValueChange = {
-                        if (it.text.length <= maxTitleLength) title = it
-                    },
+                    onValueChange = { if (it.text.length <= maxTitleLength) title = it },
                     label = { Text("Title") },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 2,
@@ -159,9 +150,7 @@ fun NoteEditScreen(
             Box(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     value = content,
-                    onValueChange = {
-                        if (it.text.length <= maxContentLength) content = it
-                    },
+                    onValueChange = { if (it.text.length <= maxContentLength) content = it },
                     label = { Text("Content") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -185,11 +174,9 @@ fun NoteEditScreen(
                 text = { Text("Are you sure you want to delete this note?") },
                 confirmButton = {
                     TextButton(onClick = {
-                        if (isEditing) {
-                            viewModel.deleteNote(note)
-                        }
+                        if (isEditing) viewModel.deleteNote(note)
                         showDeleteDialog = false
-                        navController.popBackStack()
+                        onBack()
                     }) { Text("Delete") }
                 },
                 dismissButton = {
