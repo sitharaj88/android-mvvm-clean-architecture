@@ -27,24 +27,61 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.sitharaj.notes.core.analytics.AnalyticsEvent
+import com.sitharaj.notes.core.analytics.CompositeAnalytics
+import com.sitharaj.notes.core.common.AppError
+import com.sitharaj.notes.core.observability.CompositeCrashReporter
 import com.sitharaj.notes.domain.repository.NoteRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.util.concurrent.TimeUnit
+import com.sitharaj.notes.core.common.Result as AppResult
 
 @HiltWorker
 class NotesSyncWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
-    private val repository: NoteRepository
+    private val repository: NoteRepository,
+    private val analytics: CompositeAnalytics,
+    private val crashReporter: CompositeCrashReporter
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
         return try {
-            repository.syncNotes()
-            Result.success()
+            when (val result = repository.syncNotes()) {
+                is AppResult.Ok -> {
+                    analytics.track(AnalyticsEvent("sync.success"))
+                    Result.success()
+                }
+                is AppResult.Err -> handleError(result.error)
+            }
         } catch (e: Exception) {
+            crashReporter.recordNonFatal(e, mapOf("stage" to "sync"))
             Result.retry()
         }
+    }
+
+    /**
+     * Maps a structured [AppError] to a WorkManager outcome. Only transient failures are retried;
+     * terminal failures (validation, auth, 4xx) fail fast so WorkManager does not waste retries.
+     */
+    private fun handleError(error: AppError): Result {
+        analytics.track(AnalyticsEvent("sync.failure", mapOf("error" to error::class.simpleName)))
+        return when (error) {
+            is AppError.Network -> {
+                val transient = error.isRetryable ||
+                    error.kind == AppError.Network.Kind.Timeout ||
+                    error.kind == AppError.Network.Kind.Unreachable ||
+                    error.kind == AppError.Network.Kind.Http5xx
+                if (transient) Result.retry() else terminal(error)
+            }
+            is AppError.Auth -> terminal(error)
+            else -> terminal(error)
+        }
+    }
+
+    private fun terminal(error: AppError): Result {
+        crashReporter.log("Sync failed terminally: $error")
+        return Result.failure()
     }
 }
 

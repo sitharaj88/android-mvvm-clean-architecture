@@ -19,14 +19,41 @@
 package com.sitharaj.notes
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
+import com.sitharaj.notes.core.plugin.AppInitializer
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
 /**
  * Application class for the Notes app.
  *
- * Initializes global application state and is the entry point for app-wide configuration.
+ * Two responsibilities:
+ *  1. Runs every contributed [AppInitializer] at startup — the pluggable-startup registry. Adding
+ *     new startup work never requires editing this class; just contribute an `@IntoSet` binding.
+ *  2. Supplies the [HiltWorkerFactory] so `@HiltWorker` workers (e.g.
+ *     [com.sitharaj.notes.sync.NotesSyncWorker]) can be constructed with their injected
+ *     dependencies. The default WorkManager initializer is disabled in the manifest so this
+ *     configuration is used instead.
  *
  * @constructor Creates an instance of [NotesApp].
  */
 @HiltAndroidApp
-class NotesApp : Application()
+class NotesApp : Application(), Configuration.Provider {
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
+    @Inject
+    lateinit var initializers: Set<@JvmSuppressWildcards AppInitializer>
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
+
+    override fun onCreate() {
+        super.onCreate()
+        initializers.forEach { it.initialize() }
+    }
+}

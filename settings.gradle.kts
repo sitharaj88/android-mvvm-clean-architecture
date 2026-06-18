@@ -22,3 +22,6 @@ dependencyResolutionManagement {
 rootProject.name = "Notes"
 include(":app")
 include(":design")
+include(":core")
+include(":domain")
+include(":data")

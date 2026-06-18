@@ -12,9 +12,12 @@
  * limitations under the License.
  */
 
-package com.sitharaj.notes.core.common
+package com.sitharaj.notes.data.common
 
+import com.sitharaj.notes.core.common.AppError
+import com.sitharaj.notes.core.common.ErrorExtensions
 import com.sitharaj.notes.core.common.ErrorExtensions.toAppError
+import com.sitharaj.notes.core.common.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

@@ -23,7 +23,7 @@ import com.sitharaj.notes.common.Logger
 import com.sitharaj.notes.core.common.AppError
 import com.sitharaj.notes.core.common.ErrorExtensions.toAppError
 import com.sitharaj.notes.core.common.Result
-import com.sitharaj.notes.core.common.SafeCall
+import com.sitharaj.notes.data.common.SafeCall
 import com.sitharaj.notes.data.local.NoteLocalDataSource
 import com.sitharaj.notes.data.local.entity.NoteEntity
 import com.sitharaj.notes.data.local.entity.SyncState
