@@ -18,13 +18,15 @@
 package com.sitharaj.notes.di
 
 import com.sitharaj.notes.data.remote.auth.AuthInterceptor
-import com.sitharaj.notes.data.remote.auth.SharedPrefsTokenStorage
+import com.sitharaj.notes.data.remote.auth.EncryptedTokenStorage
+import com.sitharaj.notes.data.remote.auth.TokenAuthenticator
 import com.sitharaj.notes.data.remote.auth.TokenStorage
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
+import okhttp3.Authenticator
 import okhttp3.Interceptor
 import javax.inject.Singleton
 
@@ -38,11 +40,17 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class AuthModule {
+    /** Hardened, encrypted token store. Swap to `SharedPrefsTokenStorage` here to change backing. */
     @Binds
     @Singleton
-    abstract fun bindTokenStorage(impl: SharedPrefsTokenStorage): TokenStorage
+    abstract fun bindTokenStorage(impl: EncryptedTokenStorage): TokenStorage
 
+    /** Attaches the bearer token to outgoing requests. */
     @Binds
     @IntoSet
     abstract fun bindAuthInterceptor(impl: AuthInterceptor): Interceptor
+
+    /** Refreshes the token and retries on 401 (makes the client's optional authenticator present). */
+    @Binds
+    abstract fun bindAuthenticator(impl: TokenAuthenticator): Authenticator
 }

@@ -20,10 +20,12 @@ package com.sitharaj.notes.di
 import com.sitharaj.notes.data.remote.DefaultNetworkConfig
 import com.sitharaj.notes.data.remote.NetworkConfig
 import dagger.Binds
+import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.Multibinds
+import okhttp3.Authenticator
 import okhttp3.Interceptor
 import javax.inject.Singleton
 
@@ -42,4 +44,11 @@ abstract class NetworkBindingsModule {
     @Binds
     @Singleton
     abstract fun bindNetworkConfig(impl: DefaultNetworkConfig): NetworkConfig
+
+    /**
+     * Declares the OkHttp [Authenticator] as optional. The client uses it only when an auth plug
+     * (e.g. [com.sitharaj.notes.di.AuthModule]) binds a concrete [Authenticator].
+     */
+    @BindsOptionalOf
+    abstract fun optionalAuthenticator(): Authenticator
 }

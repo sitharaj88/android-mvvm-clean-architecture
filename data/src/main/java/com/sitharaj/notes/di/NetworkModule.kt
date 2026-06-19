@@ -20,14 +20,18 @@ package com.sitharaj.notes.di
 
 import com.sitharaj.notes.data.remote.NetworkConfig
 import com.sitharaj.notes.data.remote.NotesApiService
+import com.sitharaj.notes.data.remote.OAuthApiService
+import com.sitharaj.notes.data.remote.auth.RefreshClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
+import okhttp3.Authenticator
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import java.util.Optional
 import java.util.concurrent.TimeUnit
 import retrofit2.Retrofit
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
@@ -74,14 +78,53 @@ object NetworkModule {
     @Singleton
     fun provideOkHttpClient(
         interceptors: Set<@JvmSuppressWildcards Interceptor>,
+        authenticator: Optional<Authenticator>,
         config: NetworkConfig
     ): OkHttpClient =
         OkHttpClient.Builder()
             .connectTimeout(config.connectTimeoutSeconds, TimeUnit.SECONDS)
             .readTimeout(config.readTimeoutSeconds, TimeUnit.SECONDS)
             .writeTimeout(config.writeTimeoutSeconds, TimeUnit.SECONDS)
-            .apply { interceptors.forEach { addInterceptor(it) } }
+            .apply {
+                interceptors.forEach { addInterceptor(it) }
+                // Optional 401-refresh authenticator — present only when an auth plug is installed.
+                if (authenticator.isPresent) authenticator(authenticator.get())
+            }
             .build()
+
+    /**
+     * Bare client used solely for token refresh — no interceptors/authenticator, which breaks the
+     * dependency cycle between the authenticated client and the OAuth refresh call.
+     */
+    @Provides
+    @Singleton
+    @RefreshClient
+    fun provideRefreshOkHttpClient(config: NetworkConfig): OkHttpClient =
+        OkHttpClient.Builder()
+            .connectTimeout(config.connectTimeoutSeconds, TimeUnit.SECONDS)
+            .readTimeout(config.readTimeoutSeconds, TimeUnit.SECONDS)
+            .writeTimeout(config.writeTimeoutSeconds, TimeUnit.SECONDS)
+            .build()
+
+    /**
+     * Provides the OAuth token API, used by the 401 authenticator to refresh tokens.
+     */
+    @OptIn(ExperimentalSerializationApi::class)
+    @Provides
+    @Singleton
+    fun provideOAuthApiService(
+        @RefreshClient okHttpClient: OkHttpClient,
+        config: NetworkConfig
+    ): OAuthApiService =
+        Retrofit.Builder()
+            .baseUrl(config.baseUrl)
+            .client(okHttpClient)
+            .addConverterFactory(
+                Json { ignoreUnknownKeys = true }.asConverterFactory("application/json".toMediaType()!!)
+            )
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .build()
+            .create(OAuthApiService::class.java)
 
     /**
      * Provides the Retrofit instance for API calls, using the pluggable [NetworkConfig] base URL.

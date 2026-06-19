@@ -31,6 +31,8 @@ interface NetworkConfig {
     val connectTimeoutSeconds: Long
     val readTimeoutSeconds: Long
     val writeTimeoutSeconds: Long
+    val oauthClientId: String
+    val oauthClientSecret: String
 }
 
 /**
@@ -42,4 +44,6 @@ class DefaultNetworkConfig @javax.inject.Inject constructor() : NetworkConfig {
     override val connectTimeoutSeconds: Long = 10
     override val readTimeoutSeconds: Long = 15
     override val writeTimeoutSeconds: Long = 15
+    override val oauthClientId: String = BuildConfig.OAUTH_CLIENT_ID
+    override val oauthClientSecret: String = BuildConfig.OAUTH_CLIENT_SECRET
 }

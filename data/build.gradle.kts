@@ -28,10 +28,14 @@ android {
         create("dev") {
             dimension = "environment"
             buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/\"")
+            buildConfigField("String", "OAUTH_CLIENT_ID", "\"notes-dev-client\"")
+            buildConfigField("String", "OAUTH_CLIENT_SECRET", "\"dev-secret\"")
         }
         create("prod") {
             dimension = "environment"
             buildConfigField("String", "BASE_URL", "\"https://api.example.com/\"")
+            buildConfigField("String", "OAUTH_CLIENT_ID", "\"notes-client\"")
+            buildConfigField("String", "OAUTH_CLIENT_SECRET", "\"\"")
         }
     }
 
@@ -69,6 +73,9 @@ dependencies {
     implementation(libs.converter.kotlinx.serialization)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
+
+    // Encrypted token storage
+    implementation(libs.androidx.security.crypto)
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)

@@ -18,41 +18,39 @@
 package com.sitharaj.notes.data.remote.auth
 
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 /**
- * Pluggable auth-token store. Swap the backing store (SharedPreferences today, EncryptedSharedPrefs
- * or DataStore tomorrow) by binding a different implementation — the [AuthInterceptor] and the rest
- * of the app are unaffected.
+ * [TokenStorage] backed by Jetpack Security's [EncryptedSharedPreferences] (AES-256, keys held in
+ * the Android Keystore). This is the hardened default; plug [SharedPrefsTokenStorage] instead for
+ * environments where the keystore is unavailable.
+ *
+ * Falls back to plain prefs if encrypted prefs cannot be created on a given device so the app keeps
+ * working rather than crashing at startup.
  *
  * @author Sitharaj Seenivasan
  * @since 1.0.0
  */
-interface TokenStorage {
-    /** The current bearer access token, or null if signed out. */
-    fun accessToken(): String?
-
-    /** The current refresh token, or null. */
-    fun refreshToken(): String?
-
-    /** Persists the tokens after a successful sign-in / refresh. */
-    fun saveTokens(accessToken: String, refreshToken: String?)
-
-    /** Clears all stored tokens (sign-out). */
-    fun clear()
-}
-
-/**
- * Default [TokenStorage] backed by private [android.content.SharedPreferences].
- *
- * Swap this binding for an `EncryptedSharedPreferences`-backed implementation to harden at-rest
- * storage — no other code changes required.
- */
-class SharedPrefsTokenStorage @Inject constructor(
+class EncryptedTokenStorage @Inject constructor(
     @ApplicationContext context: Context
 ) : TokenStorage {
-    private val prefs = context.getSharedPreferences("auth_tokens", Context.MODE_PRIVATE)
+
+    private val prefs: SharedPreferences = runCatching {
+        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        EncryptedSharedPreferences.create(
+            "auth_tokens_encrypted",
+            masterKeyAlias,
+            context,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }.getOrElse {
+        context.getSharedPreferences("auth_tokens", Context.MODE_PRIVATE)
+    }
 
     override fun accessToken(): String? = prefs.getString(KEY_ACCESS, null)
 

@@ -34,6 +34,10 @@ dependencies {
     implementation(project(":core"))
     implementation(libs.kotlinx.coroutines.core)
 
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+
     detektPlugins(libs.detekt.compose.rules)
 }
 
