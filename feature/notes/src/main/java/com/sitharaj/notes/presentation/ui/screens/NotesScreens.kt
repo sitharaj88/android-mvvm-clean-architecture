@@ -32,7 +32,6 @@ package com.sitharaj.notes.presentation.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,9 +60,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
 import java.util.Locale
 import com.sitharaj.notes.domain.model.Note
@@ -73,30 +69,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import com.sitharaj.notes.presentation.state.NotesUiState
-
-/**
- * Root composable for the Notes application, setting up navigation and the main screens.
- *
- * @param innerPadding The padding to apply around the navigation host.
- */
-@Composable
-@Suppress("FunctionNaming")
-fun NotesApp(innerPadding: PaddingValues = PaddingValues()) {
-    val navController = rememberNavController()
-    NavHost(
-        navController,
-        startDestination = "notes_list",
-        modifier = Modifier.padding(innerPadding)
-    ) {
-        composable("notes_list") {
-            NotesListScreen(navController)
-        }
-        composable("note_edit/{noteId}") { backStackEntry ->
-            val noteId = backStackEntry.arguments?.getString("noteId")?.toIntOrNull()
-            NoteEditScreen(navController, noteId)
-        }
-    }
-}
 
 /**
  * Composable screen displaying the list of notes.

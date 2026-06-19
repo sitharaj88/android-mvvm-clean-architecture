@@ -22,10 +22,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.sitharaj.notes.presentation.ui.screens.NotesApp
+import com.sitharaj.notes.core.navigation.FeatureNavGraph
 import com.sitharaj.notes.design.NotesTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.material3.Scaffold
+import javax.inject.Inject
 
 /**
  * The main entry point for the Notes application.
@@ -38,6 +39,11 @@ import androidx.compose.material3.Scaffold
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    /** All registered feature navigation graphs — populated by whichever feature modules are present. */
+    @Inject
+    lateinit var featureNavGraphs: Set<@JvmSuppressWildcards FeatureNavGraph>
+
     /**
      * Called when the activity is starting. Sets up the Compose content and theme.
      *
@@ -50,9 +56,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NotesTheme {
-                Scaffold {
-                    innerPadding ->
-                    NotesApp(innerPadding)
+                Scaffold { innerPadding ->
+                    AppNavHost(featureNavGraphs, innerPadding)
                 }
             }
         }

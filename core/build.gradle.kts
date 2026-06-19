@@ -44,6 +44,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
 
+    // Navigation types for the pluggable FeatureNavGraph contract consumed by the app host.
+    implementation(libs.androidx.navigation.compose)
+
     // Hilt — :core declares pluggable DI extension points (multibindings) consumed app-wide.
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
