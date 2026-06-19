@@ -56,7 +56,7 @@ import kotlinx.coroutines.flow.map
  * @date 22 Jun 2025
  * @version 1.0.0
  */
-class NoteRepositoryImpl(
+class NoteRepositoryImpl @javax.inject.Inject constructor(
     private val local: NoteLocalDataSource,
     private val remote: NoteRemoteDataSource,
     private val logger: Logger = AndroidLogger(),
@@ -157,7 +157,7 @@ class NoteRepositoryImpl(
     override suspend fun syncNotes(): Result<Unit> = Result.catching {
         _syncState.value = SyncState.PENDING
 
-        val notesToSync = local.noteDao.getNotesNeedingSync()
+        val notesToSync = local.getNotesNeedingSync()
         notesToSync.forEach { entity ->
             syncEntity(entity)
         }
@@ -192,7 +192,7 @@ class NoteRepositoryImpl(
                 "NoteRepositoryImpl",
                 "Sync error for note ${entity.id}: ${error.message}"
             )
-            local.noteDao.updateSyncState(entity.id, SyncState.FAILED)
+            local.updateSyncState(entity.id, SyncState.FAILED)
         }
     }
 
@@ -212,7 +212,7 @@ class NoteRepositoryImpl(
             remote.updateNote(entity.id, dto)
         }
 
-        local.noteDao.updateSyncState(entity.id, SyncState.SYNCED)
+        local.updateSyncState(entity.id, SyncState.SYNCED)
         local.updateNote(entity.copy(lastSynced = now, syncState = SyncState.SYNCED))
     }).onFailure { error ->
         logger.e(
@@ -229,7 +229,7 @@ class NoteRepositoryImpl(
      */
     private suspend fun deleteRemoteEntity(entity: NoteEntity): Result<Unit> = SafeCall.safeHttp(block = {
         remote.deleteNote(entity.id)
-        local.noteDao.deleteNote(entity)
+        local.deleteNote(entity)
     }).onFailure { error ->
         logger.e(
             "NoteRepositoryImpl",

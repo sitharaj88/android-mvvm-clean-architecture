@@ -24,6 +24,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.sitharaj.notes.common.Logger
 import com.sitharaj.notes.data.local.NoteLocalDataSource
+import com.sitharaj.notes.data.local.RoomNoteLocalDataSource
 import com.sitharaj.notes.data.local.NotesDatabase
 import com.sitharaj.notes.data.local.dao.NoteDao
 import com.sitharaj.notes.data.local.entity.NoteEntity
@@ -64,7 +65,7 @@ class NoteRepositoryImplTest {
             .allowMainThreadQueries()
             .build()
         noteDao = db.noteDao()
-        local = NoteLocalDataSource(noteDao)
+        local = RoomNoteLocalDataSource(noteDao)
         remote = mock(NoteRemoteDataSource::class.java)
         logger = mock(Logger::class.java)
         repository = NoteRepositoryImpl(local, remote, logger)

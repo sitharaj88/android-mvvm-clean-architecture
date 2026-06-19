@@ -20,16 +20,10 @@ package com.sitharaj.notes.di
 
 import android.content.Context
 import androidx.room.Room
-import com.sitharaj.notes.common.AndroidLogger
-import com.sitharaj.notes.common.Logger
 import com.sitharaj.notes.core.common.DefaultDispatchers
 import com.sitharaj.notes.core.common.DispatcherProvider
 import com.sitharaj.notes.data.local.NotesDatabase
 import com.sitharaj.notes.data.local.dao.NoteDao
-import com.sitharaj.notes.data.local.NoteLocalDataSource
-import com.sitharaj.notes.data.remote.NoteRemoteDataSource
-import com.sitharaj.notes.data.remote.NotesApiService
-import com.sitharaj.notes.data.repository.NoteRepositoryImpl
 import com.sitharaj.notes.domain.repository.NoteRepository
 import com.sitharaj.notes.domain.usecase.AddNoteUseCase
 import com.sitharaj.notes.domain.usecase.DeleteNoteUseCase
@@ -95,54 +89,6 @@ object AppModule {
 @Module
 @InstallIn(SingletonComponent::class)
 object DataModule {
-    /**
-     * Provides the local data source for notes.
-     *
-     * @param noteDao The [NoteDao] instance.
-     * @return The [NoteLocalDataSource] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideNoteLocalDataSource(noteDao: NoteDao): NoteLocalDataSource =
-        NoteLocalDataSource(noteDao)
-
-    /**
-     * Provides the remote data source for notes.
-     *
-     * @param api The [NotesApiService] instance.
-     * @return The [NoteRemoteDataSource] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideNoteRemoteDataSource(api: com.sitharaj.notes.data.remote.NotesApiService): NoteRemoteDataSource =
-        NoteRemoteDataSource(api)
-
-    /**
-     * Provides the logger implementation for the app.
-     *
-     * @return The [Logger] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideLogger(): Logger = AndroidLogger()
-
-    /**
-     * Provides the note repository implementation.
-     *
-     * @param local The [NoteLocalDataSource] instance.
-     * @param remote The [NoteRemoteDataSource] instance.
-     * @param logger The [Logger] instance.
-     * @return The [NoteRepository] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideNoteRepository(
-        local: NoteLocalDataSource,
-        remote: NoteRemoteDataSource,
-        logger: Logger,
-        crashReporter: com.sitharaj.notes.core.observability.CompositeCrashReporter
-    ): NoteRepository = NoteRepositoryImpl(local, remote, logger, crashReporter)
-
     /**
      * Provides the use cases for note operations.
      *

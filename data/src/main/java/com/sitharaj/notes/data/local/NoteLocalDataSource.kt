@@ -20,48 +20,51 @@ package com.sitharaj.notes.data.local
 
 import com.sitharaj.notes.data.local.dao.NoteDao
 import com.sitharaj.notes.data.local.entity.NoteEntity
+import com.sitharaj.notes.data.local.entity.SyncState
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
 /**
- * Local data source for managing notes in the local database.
+ * Local data source contract for notes. Swap the storage engine (Room, DataStore, an in-memory
+ * cache, …) by binding a different implementation — the repository depends only on this interface.
  *
- * Provides methods to retrieve, insert, update, and delete notes.
- *
- * @property noteDao The DAO for accessing note data.
  * @author Sitharaj Seenivasan
- * @date 22 Jun 2025
  * @since 1.0.0
  */
-open class NoteLocalDataSource(val noteDao: NoteDao) {
-    /**
-     * Returns a flow of all notes ordered by timestamp descending.
-     *
-     * @return [Flow] emitting the list of [NoteEntity]s.
-     */
-    fun getNotes(): Flow<List<NoteEntity>> = noteDao.getAllNotes()
-    /**
-     * Retrieves a note by its ID.
-     *
-     * @param id The unique identifier of the note.
-     * @return The [NoteEntity] if found, null otherwise.
-     */
-    suspend fun getNoteById(id: Int): NoteEntity? = noteDao.getNoteById(id)
-    /**
-     * Inserts a note into the database. Replaces on conflict.
-     *
-     * @param note The [NoteEntity] to insert.
-     */
-    suspend fun insertNote(note: NoteEntity) = noteDao.insertNote(note)
-    /**
-     * Updates an existing note in the database.
-     *
-     * @param note The [NoteEntity] to update.
-     */
-    suspend fun updateNote(note: NoteEntity) = noteDao.updateNote(note)
-    /**
-     * Deletes a note from the database.
-     *
-     * @param note The [NoteEntity] to delete.
-     */
-    suspend fun deleteNote(note: NoteEntity) = noteDao.deleteNote(note)
+interface NoteLocalDataSource {
+    /** Returns a flow of all notes ordered by timestamp descending. */
+    fun getNotes(): Flow<List<NoteEntity>>
+
+    /** Retrieves a note by its ID, or null if not found. */
+    suspend fun getNoteById(id: Int): NoteEntity?
+
+    /** Inserts a note, replacing on conflict. */
+    suspend fun insertNote(note: NoteEntity)
+
+    /** Updates an existing note. */
+    suspend fun updateNote(note: NoteEntity)
+
+    /** Deletes a note. */
+    suspend fun deleteNote(note: NoteEntity)
+
+    /** Returns notes that are not yet synced. */
+    suspend fun getNotesNeedingSync(): List<NoteEntity>
+
+    /** Updates the sync state of a note by id. */
+    suspend fun updateSyncState(id: Int, syncState: SyncState)
+}
+
+/**
+ * Room-backed [NoteLocalDataSource]. The default storage plug-in.
+ */
+class RoomNoteLocalDataSource @Inject constructor(
+    private val noteDao: NoteDao
+) : NoteLocalDataSource {
+    override fun getNotes(): Flow<List<NoteEntity>> = noteDao.getAllNotes()
+    override suspend fun getNoteById(id: Int): NoteEntity? = noteDao.getNoteById(id)
+    override suspend fun insertNote(note: NoteEntity) = noteDao.insertNote(note)
+    override suspend fun updateNote(note: NoteEntity) = noteDao.updateNote(note)
+    override suspend fun deleteNote(note: NoteEntity) = noteDao.deleteNote(note)
+    override suspend fun getNotesNeedingSync(): List<NoteEntity> = noteDao.getNotesNeedingSync()
+    override suspend fun updateSyncState(id: Int, syncState: SyncState) = noteDao.updateSyncState(id, syncState)
 }

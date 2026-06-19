@@ -34,6 +34,14 @@
 
 package com.sitharaj.notes.common
 
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.IntoSet
+import dagger.multibindings.Multibinds
+import javax.inject.Inject
+
 /**
  * Defines logging levels for the application.
  *
@@ -106,7 +114,7 @@ interface Logger {
  * @date 22 Jun 2025
  * @since 1.0.0
  */
-class AndroidLogger : Logger {
+class AndroidLogger @Inject constructor() : Logger {
     /**
      * Logs a message to the Android logcat with the specified log level.
      *
@@ -123,4 +131,37 @@ class AndroidLogger : Logger {
             LogLevel.ERROR -> android.util.Log.e(tag, message, throwable)
         }
     }
+}
+
+/**
+ * Fan-out [Logger] that forwards every log to all registered loggers. App code depends only on
+ * this; plug a new sink (file, remote, Crashlytics breadcrumb) with one `@Binds @IntoSet` binding.
+ *
+ * @author Sitharaj Seenivasan
+ * @since 1.0.0
+ */
+class CompositeLogger @Inject constructor(
+    private val loggers: Set<@JvmSuppressWildcards Logger>
+) : Logger {
+    override fun log(level: LogLevel, tag: String, message: String, throwable: Throwable?) {
+        loggers.forEach { runCatching { it.log(level, tag, message, throwable) } }
+    }
+}
+
+/**
+ * Registers the logging plugin set: the single injectable [Logger] fans out to every contributed
+ * sink, with [AndroidLogger] (logcat) installed by default.
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class LoggerModule {
+    @Multibinds
+    abstract fun loggers(): Set<Logger>
+
+    @Binds
+    @IntoSet
+    abstract fun bindAndroidLogger(impl: AndroidLogger): Logger
+
+    @Binds
+    abstract fun bindLogger(impl: CompositeLogger): Logger
 }

@@ -20,9 +20,19 @@ android {
         minSdk = 24
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     productFlavors {
-        create("dev") { dimension = "environment" }
-        create("prod") { dimension = "environment" }
+        create("dev") {
+            dimension = "environment"
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/\"")
+        }
+        create("prod") {
+            dimension = "environment"
+            buildConfigField("String", "BASE_URL", "\"https://api.example.com/\"")
+        }
     }
 
     compileOptions {

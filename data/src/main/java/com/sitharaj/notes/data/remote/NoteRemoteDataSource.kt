@@ -20,54 +20,33 @@ package com.sitharaj.notes.data.remote
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 /**
- * Provides remote data operations for notes using [NotesApiService].
- *
- * This class is responsible for making network calls to fetch, create, update, and delete notes
- * from the remote server, and always runs these operations on the IO dispatcher.
- *
- * @property api The [NotesApiService] used to perform network operations.
+ * Remote data source contract for notes. Swap the transport (Retrofit, Ktor, gRPC, a fake, …) by
+ * binding a different implementation — the repository depends only on this interface.
  *
  * @author Sitharaj Seenivasan
- * @date 22 Jun 2025
- * @version 1.0.0
+ * @since 1.0.0
  */
-class NoteRemoteDataSource(private val api: NotesApiService) {
-    /**
-     * Fetches all notes from the remote server.
-     *
-     * @return A list of [NoteDto] objects from the server.
-     */
-    suspend fun getNotes() = withContext(Dispatchers.IO) { api.getNotes() }
+interface NoteRemoteDataSource {
+    suspend fun getNotes(): List<NoteDto>
+    suspend fun getNoteById(id: Int): NoteDto
+    suspend fun addNote(note: NoteDto): NoteDto
+    suspend fun updateNote(id: Int, note: NoteDto): NoteDto
+    suspend fun deleteNote(id: Int)
+}
 
-    /**
-     * Fetches a single note by its id from the remote server.
-     *
-     * @param id The id of the note to fetch.
-     * @return The [NoteDto] with the given id.
-     */
-    suspend fun getNoteById(id: Int) = withContext(Dispatchers.IO) { api.getNote(id) }
-
-    /**
-     * Creates a new note on the remote server.
-     *
-     * @param note The [NoteDto] to create.
-     */
-    suspend fun addNote(note: NoteDto) = withContext(Dispatchers.IO) { api.createNote(note) }
-
-    /**
-     * Updates an existing note on the remote server.
-     *
-     * @param id The id of the note to update.
-     * @param note The [NoteDto] with updated data.
-     */
-    suspend fun updateNote(id: Int, note: NoteDto) = withContext(Dispatchers.IO) { api.updateNote(id, note) }
-
-    /**
-     * Deletes a note from the remote server by its id.
-     *
-     * @param id The id of the note to delete.
-     */
-    suspend fun deleteNote(id: Int) = withContext(Dispatchers.IO) { api.deleteNote(id) }
+/**
+ * Retrofit-backed [NoteRemoteDataSource]. The default network plug-in; always runs on IO.
+ */
+class RetrofitNoteRemoteDataSource @Inject constructor(
+    private val api: NotesApiService
+) : NoteRemoteDataSource {
+    override suspend fun getNotes(): List<NoteDto> = withContext(Dispatchers.IO) { api.getNotes() }
+    override suspend fun getNoteById(id: Int): NoteDto = withContext(Dispatchers.IO) { api.getNote(id) }
+    override suspend fun addNote(note: NoteDto): NoteDto = withContext(Dispatchers.IO) { api.createNote(note) }
+    override suspend fun updateNote(id: Int, note: NoteDto): NoteDto =
+        withContext(Dispatchers.IO) { api.updateNote(id, note) }
+    override suspend fun deleteNote(id: Int) = withContext(Dispatchers.IO) { api.deleteNote(id) }
 }

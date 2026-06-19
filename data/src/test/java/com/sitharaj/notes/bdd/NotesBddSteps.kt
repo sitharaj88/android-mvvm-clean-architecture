@@ -2,7 +2,7 @@ package com.sitharaj.notes.bdd
 
 import com.sitharaj.notes.data.local.entity.NoteEntity
 import com.sitharaj.notes.data.local.entity.SyncState
-import com.sitharaj.notes.data.local.NoteLocalDataSource
+import com.sitharaj.notes.data.local.RoomNoteLocalDataSource
 import com.sitharaj.notes.data.local.dao.NoteDao
 import com.sitharaj.notes.data.mapper.toDomain
 import com.sitharaj.notes.domain.model.Note
@@ -10,7 +10,7 @@ import com.sitharaj.notes.data.repository.NoteRepositoryImpl
 import io.cucumber.java.Before
 import io.mockk.mockk
 import com.sitharaj.notes.data.remote.NotesApiService
-import com.sitharaj.notes.data.remote.NoteRemoteDataSource
+import com.sitharaj.notes.data.remote.RetrofitNoteRemoteDataSource
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
 import io.cucumber.java.en.Given
@@ -47,9 +47,9 @@ class NotesBddSteps {
             )
         }
         val fakeDao = FakeNoteDao(entities)
-        val localDataSource = NoteLocalDataSource(fakeDao)
+        val localDataSource = RoomNoteLocalDataSource(fakeDao)
         val api = mockk<NotesApiService>(relaxed = true)
-        val remote = NoteRemoteDataSource(api)
+        val remote = RetrofitNoteRemoteDataSource(api)
         repository = NoteRepositoryImpl(localDataSource, remote, com.sitharaj.notes.common.AndroidLogger())
     }
 

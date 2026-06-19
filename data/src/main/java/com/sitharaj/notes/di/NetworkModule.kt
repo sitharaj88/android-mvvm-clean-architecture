@@ -18,12 +18,14 @@
 
 package com.sitharaj.notes.di
 
+import com.sitharaj.notes.data.remote.NetworkConfig
 import com.sitharaj.notes.data.remote.NotesApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.MediaType
+import dagger.multibindings.IntoSet
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -50,42 +52,50 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
     /**
-     * Provides the OkHttp client for network requests.
+     * Contributes the HTTP logging interceptor into the pluggable interceptor set.
+     * Remove this binding to unplug logging; add new `@Provides @IntoSet` interceptors
+     * (auth, headers, …) to plug them in — no edit to [provideOkHttpClient] needed.
+     */
+    @Provides
+    @IntoSet
+    @Singleton
+    fun provideLoggingInterceptor(): Interceptor =
+        HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BASIC
+        }
+
+    /**
+     * Provides the OkHttp client, applying every registered [Interceptor] from the multibound set
+     * and the pluggable [NetworkConfig] timeouts.
      *
      * @return The [OkHttpClient] instance.
      */
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient =
+    fun provideOkHttpClient(
+        interceptors: Set<@JvmSuppressWildcards Interceptor>,
+        config: NetworkConfig
+    ): OkHttpClient =
         OkHttpClient.Builder()
-            // Configure sensible timeouts for production environments
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .writeTimeout(15, TimeUnit.SECONDS)
-            .apply {
-                // Add a logging interceptor in debug builds to aid diagnosis. This check is
-                // performed against the generated BuildConfig at runtime. The fallback to
-                // always logging can be replaced with build variant specific injection if
-                // BuildConfig is unavailable in this module.
-                val logging = HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BASIC
-                }
-                addInterceptor(logging)
-            }
+            .connectTimeout(config.connectTimeoutSeconds, TimeUnit.SECONDS)
+            .readTimeout(config.readTimeoutSeconds, TimeUnit.SECONDS)
+            .writeTimeout(config.writeTimeoutSeconds, TimeUnit.SECONDS)
+            .apply { interceptors.forEach { addInterceptor(it) } }
             .build()
 
     /**
-     * Provides the Retrofit instance for API calls.
+     * Provides the Retrofit instance for API calls, using the pluggable [NetworkConfig] base URL.
      *
      * @param okHttpClient The [OkHttpClient] to use for network requests.
+     * @param config The pluggable network configuration.
      * @return The [Retrofit] instance.
      */
     @OptIn(ExperimentalSerializationApi::class)
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit =
+    fun provideRetrofit(okHttpClient: OkHttpClient, config: NetworkConfig): Retrofit =
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3000/") // Use 10.0.2.2 for Android emulator localhost
+            .baseUrl(config.baseUrl)
             .client(okHttpClient)
             .addConverterFactory(
                 Json { ignoreUnknownKeys = true }.asConverterFactory("application/json".toMediaType()!!)

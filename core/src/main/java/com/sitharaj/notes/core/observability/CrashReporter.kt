@@ -97,4 +97,8 @@ abstract class CrashReporterModule {
     @Binds
     @IntoSet
     abstract fun bindLogcatCrashReporter(impl: LogcatCrashReporter): CrashReporter
+
+    /** The single injectable [CrashReporter] is the fan-out facade over all registered reporters. */
+    @Binds
+    abstract fun bindCrashReporter(impl: CompositeCrashReporter): CrashReporter
 }
