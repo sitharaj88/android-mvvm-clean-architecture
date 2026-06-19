@@ -31,6 +31,14 @@ style:
   ReturnCount:
     active: true
     max: 10
+  UnusedPrivateMember:
+    # @Preview composables are entry points used by tooling, not called in code.
+    ignoreAnnotated: [ 'Preview' ]
+
+naming:
+  FunctionNaming:
+    # @Composable functions are PascalCase by convention; exempt them.
+    ignoreAnnotated: [ 'Composable' ]
 
 complexity:
   TooManyFunctions:
@@ -49,6 +57,9 @@ complexity:
   CyclomaticComplexMethod:
     active: true
     threshold: 30
+  LongParameterList:
+    # Composable functions legitimately take many parameters (state + callbacks + modifier).
+    ignoreAnnotated: [ 'Composable' ]
 
 performance:
   SpreadOperator:

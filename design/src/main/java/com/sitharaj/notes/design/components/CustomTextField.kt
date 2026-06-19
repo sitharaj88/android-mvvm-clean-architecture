@@ -36,8 +36,8 @@ import androidx.compose.ui.unit.dp
  * @param value The current text value.
  * @param onValueChange Callback invoked when the text value changes.
  * @param label The label to display above the text field.
- * @param placeholder The placeholder text to display when the field is empty.
  * @param modifier The modifier to apply to the text field.
+ * @param placeholder The placeholder text to display when the field is empty.
  * @param singleLine Whether the text field should be single-line.
  */
 @Composable
@@ -45,8 +45,8 @@ fun CustomTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    placeholder: String = "",
     modifier: Modifier = Modifier,
+    placeholder: String = "",
     singleLine: Boolean = false
 ) {
     OutlinedTextField(
@@ -64,7 +64,7 @@ fun CustomTextField(
 
 @Preview
 @Composable
-fun CustomTextFieldPreview() {
+private fun CustomTextFieldPreview() {
     CustomTextField(
         value = "",
         onValueChange = {},

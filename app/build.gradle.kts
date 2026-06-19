@@ -114,7 +114,7 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
 
-    // Hilt — annotation processing runs here (module that compiles the Application)
+    // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 
@@ -134,7 +134,6 @@ detekt {
     buildUponDefaultConfig = true
     config.setFrom("$rootDir/detekt.yml")
 }
-
 
 // JaCoCo configuration
 plugins.withId("jacoco") {

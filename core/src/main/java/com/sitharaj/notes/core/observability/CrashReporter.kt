@@ -45,6 +45,12 @@ interface CrashReporter {
     fun log(message: String)
 }
 
+/** A [CrashReporter] that does nothing — handy as a default for tests or fakes. */
+object NoOpCrashReporter : CrashReporter {
+    override fun recordNonFatal(throwable: Throwable, context: Map<String, Any?>) = Unit
+    override fun log(message: String) = Unit
+}
+
 /**
  * Fan-out facade dispatching to every registered [CrashReporter]. App code depends only on this.
  *

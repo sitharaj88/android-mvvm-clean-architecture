@@ -55,6 +55,6 @@ fun CustomFab(
 
 @Preview
 @Composable
-fun CustomFabPreview() {
+private fun CustomFabPreview() {
     CustomFab(onClick = {})
 }

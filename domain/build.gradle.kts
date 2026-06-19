@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.detekt.plugin)
 }
 
 android {
@@ -32,4 +33,11 @@ dependencies {
     // It depends only on :core (Result/AppError) and coroutines — never on data or presentation.
     implementation(project(":core"))
     implementation(libs.kotlinx.coroutines.core)
+
+    detektPlugins(libs.detekt.compose.rules)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom("$rootDir/detekt.yml")
 }

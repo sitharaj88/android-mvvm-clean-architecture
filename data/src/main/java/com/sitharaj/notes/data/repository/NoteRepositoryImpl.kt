@@ -23,6 +23,8 @@ import com.sitharaj.notes.common.Logger
 import com.sitharaj.notes.core.common.AppError
 import com.sitharaj.notes.core.common.ErrorExtensions.toAppError
 import com.sitharaj.notes.core.common.Result
+import com.sitharaj.notes.core.observability.CrashReporter
+import com.sitharaj.notes.core.observability.NoOpCrashReporter
 import com.sitharaj.notes.data.common.SafeCall
 import com.sitharaj.notes.data.local.NoteLocalDataSource
 import com.sitharaj.notes.data.local.entity.NoteEntity
@@ -57,7 +59,8 @@ import kotlinx.coroutines.flow.map
 class NoteRepositoryImpl(
     private val local: NoteLocalDataSource,
     private val remote: NoteRemoteDataSource,
-    private val logger: Logger = AndroidLogger()
+    private val logger: Logger = AndroidLogger(),
+    private val crashReporter: CrashReporter = NoOpCrashReporter
 ) : NoteRepository {
     private val _syncState = MutableStateFlow<SyncState>(SyncState.SYNCED)
     /**
@@ -79,6 +82,7 @@ class NoteRepositoryImpl(
             }
             .catch { throwable ->
                 logger.e("NoteRepositoryImpl", "Error fetching notes", throwable)
+                crashReporter.recordNonFatal(throwable, mapOf("op" to "getNotes"))
                 emit(Result.failure(throwable.toAppError()))
             }
 

@@ -84,7 +84,7 @@ fun CustomTopAppBar(
 
 @Preview
 @Composable
-fun CustomTopAppBarPreview() {
+private fun CustomTopAppBarPreview() {
     CustomTopAppBar(
         title = "Notes",
         onNavigationClick = {},

@@ -139,8 +139,9 @@ object DataModule {
     fun provideNoteRepository(
         local: NoteLocalDataSource,
         remote: NoteRemoteDataSource,
-        logger: Logger
-    ): NoteRepository = NoteRepositoryImpl(local, remote, logger)
+        logger: Logger,
+        crashReporter: com.sitharaj.notes.core.observability.CompositeCrashReporter
+    ): NoteRepository = NoteRepositoryImpl(local, remote, logger, crashReporter)
 
     /**
      * Provides the use cases for note operations.

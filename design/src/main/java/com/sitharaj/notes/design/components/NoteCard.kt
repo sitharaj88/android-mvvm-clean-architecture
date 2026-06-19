@@ -78,7 +78,7 @@ fun NoteCard(
 
 @Preview
 @Composable
-fun NoteCardPreview() {
+private fun NoteCardPreview() {
     NoteCard(
         title = "Sample Note",
         content = "This is a sample note content that might be longer than expected.",

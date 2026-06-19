@@ -20,6 +20,8 @@ package com.sitharaj.notes.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sitharaj.notes.core.analytics.AnalyticsEvent
+import com.sitharaj.notes.core.analytics.CompositeAnalytics
 import com.sitharaj.notes.core.common.Result
 import com.sitharaj.notes.domain.model.Note
 import com.sitharaj.notes.domain.usecase.NoteUseCases
@@ -64,7 +66,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class NotesViewModel @Inject constructor(
-    private val noteUseCases: NoteUseCases
+    private val noteUseCases: NoteUseCases,
+    private val analytics: CompositeAnalytics
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<NotesUiState>(NotesUiState.Initial)
@@ -153,6 +156,7 @@ class NotesViewModel @Inject constructor(
         viewModelScope.launch {
             noteUseCases.addNote(note).fold(
                 onSuccess = {
+                    analytics.track(AnalyticsEvent("note.created"))
                     _uiEvents.emit(NoteUiEvent.ShowSuccess("Note created successfully"))
                     _uiEvents.emit(NoteUiEvent.NavigateBack)
                 },
@@ -172,6 +176,7 @@ class NotesViewModel @Inject constructor(
         viewModelScope.launch {
             noteUseCases.updateNote(note).fold(
                 onSuccess = {
+                    analytics.track(AnalyticsEvent("note.updated"))
                     _uiEvents.emit(NoteUiEvent.ShowSuccess("Note updated successfully"))
                     _uiEvents.emit(NoteUiEvent.NavigateBack)
                 },
@@ -208,6 +213,7 @@ class NotesViewModel @Inject constructor(
         viewModelScope.launch {
             noteUseCases.deleteNote(note).fold(
                 onSuccess = {
+                    analytics.track(AnalyticsEvent("note.deleted"))
                     _uiEvents.emit(NoteUiEvent.ShowSuccess("Note deleted successfully"))
                 },
                 onFailure = { error ->

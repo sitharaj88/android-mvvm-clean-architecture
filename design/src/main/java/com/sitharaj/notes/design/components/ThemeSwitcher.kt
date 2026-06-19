@@ -71,7 +71,7 @@ fun ThemeSwitcher(
 
 @Preview
 @Composable
-fun ThemeSwitcherPreview() {
+private fun ThemeSwitcherPreview() {
     ThemeSwitcher(
         isDarkTheme = false,
         onThemeChange = {}
