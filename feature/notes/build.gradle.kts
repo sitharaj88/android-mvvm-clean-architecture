@@ -42,8 +42,10 @@ android {
 }
 
 dependencies {
+    // Vertical slice: this feature owns its domain + data + ui. Shared infra comes from :core:*.
     implementation(project(":core"))
-    implementation(project(":domain"))
+    implementation(project(":core:database"))
+    implementation(project(":core:network"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
@@ -56,7 +58,13 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
+
+    // Notes data layer
+    implementation(libs.retrofit)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
@@ -65,7 +73,15 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.robolectric)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.core.ktx)
+    testImplementation(libs.androidx.room.runtime)
+    testImplementation(libs.cucumber.junit)
+    testImplementation(libs.cucumber.java)
 
     detektPlugins(libs.detekt.compose.rules)
 }

@@ -88,8 +88,6 @@ dependencies {
     // Feature/architecture modules
     implementation(project(":design"))
     implementation(project(":core"))
-    implementation(project(":domain"))
-    implementation(project(":data"))
     implementation(project(":feature:notes"))
 
     // AndroidX / Compose / lifecycle / navigation
