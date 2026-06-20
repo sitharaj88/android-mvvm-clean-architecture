@@ -24,11 +24,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-}
+    }}
 
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
@@ -47,4 +43,10 @@ dependencies {
 detekt {
     buildUponDefaultConfig = true
     config.setFrom("$rootDir/detekt.yml")
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+    }
 }
